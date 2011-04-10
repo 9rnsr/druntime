@@ -15,7 +15,7 @@ module rt.typeinfo.ti_C;
 
 // Object
 
-class TypeInfo_C : TypeInfo
+/+class TypeInfo_C : TypeInfo
 {
     override hash_t getHash(in void* p)
     {
@@ -61,4 +61,4 @@ class TypeInfo_C : TypeInfo
     {
         return 1;
     }
-}
+}+/

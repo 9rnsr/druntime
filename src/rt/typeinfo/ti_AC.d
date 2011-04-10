@@ -15,10 +15,11 @@ module rt.typeinfo.ti_AC;
 
 // Object[]
 
-class TypeInfo_AC : TypeInfo
+class TypeInfo_AC : TypeInfo_Array
 {
     override hash_t getHash(in void* p)
-    {   Object[] s = *cast(Object[]*)p;
+    {
+		Object[] s = *cast(Object[]*)p;
         hash_t hash = 0;
 
         foreach (Object o; s)
