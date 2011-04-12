@@ -15,11 +15,14 @@ module rt.typeinfo.ti_AC;
 
 // Object[]
 
+// generate typeid(Object[]).init
+enum tid = typeid(Object[]);
+
 class TypeInfo_AC : TypeInfo_Array
 {
     override hash_t getHash(in void* p)
     {
-		Object[] s = *cast(Object[]*)p;
+        Object[] s = *cast(Object[]*)p;
         hash_t hash = 0;
 
         foreach (Object o; s)
@@ -84,7 +87,7 @@ class TypeInfo_AC : TypeInfo_Array
         }
         return c < 0 ? -1 : c > 0 ? 1 : 0;
     }
-
+/+
     override size_t tsize()
     {
         return (Object[]).sizeof;
@@ -111,4 +114,5 @@ class TypeInfo_AC : TypeInfo_Array
         //arg2 = typeid(void*);
         return 0;
     }
++/
 }
