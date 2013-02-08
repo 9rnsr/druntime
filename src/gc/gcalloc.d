@@ -42,18 +42,18 @@ else
 }
 
 /+
-static if(is(typeof(VirtualAlloc)))
+static if(is(typeof(&VirtualAlloc)))
     version = GC_Use_Alloc_Win32;
-else static if (is(typeof(mmap)))
+else static if (is(typeof(&mmap)))
     version = GC_Use_Alloc_MMap;
-else static if (is(typeof(valloc)))
+else static if (is(typeof(&valloc)))
     version = GC_Use_Alloc_Valloc;
-else static if (is(typeof(malloc)))
+else static if (is(typeof(&malloc)))
     version = GC_Use_Alloc_Malloc;
 else static assert(false, "No supported allocation methods available.");
 +/
 
-static if (is(typeof(VirtualAlloc))) // version (GC_Use_Alloc_Win32)
+static if (is(typeof(&VirtualAlloc))) // version (GC_Use_Alloc_Win32)
 {
     /**
      * Map memory.
@@ -102,7 +102,7 @@ static if (is(typeof(VirtualAlloc))) // version (GC_Use_Alloc_Win32)
         return cast(int)(VirtualFree(base, 0, MEM_RELEASE) == 0);
     }
 }
-else static if (is(typeof(mmap)))  // else version (GC_Use_Alloc_MMap)
+else static if (is(typeof(&mmap)))  // else version (GC_Use_Alloc_MMap)
 {
     void *os_mem_map(size_t nbytes)
     {   void *p;
@@ -129,7 +129,7 @@ else static if (is(typeof(mmap)))  // else version (GC_Use_Alloc_MMap)
         return munmap(base, nbytes);
     }
 }
-else static if (is(typeof(valloc))) // else version (GC_Use_Alloc_Valloc)
+else static if (is(typeof(&valloc))) // else version (GC_Use_Alloc_Valloc)
 {
     void *os_mem_map(size_t nbytes)
     {
@@ -155,7 +155,7 @@ else static if (is(typeof(valloc))) // else version (GC_Use_Alloc_Valloc)
         return 0;
     }
 }
-else static if (is(typeof(malloc))) // else version (GC_Use_Alloc_Malloc)
+else static if (is(typeof(&malloc))) // else version (GC_Use_Alloc_Malloc)
 {
     // NOTE: This assumes malloc granularity is at least (void*).sizeof.  If
     //       (req_size + PAGESIZE) is allocated, and the pointer is rounded up
