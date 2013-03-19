@@ -77,7 +77,7 @@ class Object
     /**
      * Convert Object to a human readable string.
      */
-    string toString()
+    string toString() const
     {
         return this.classinfo.name;
     }
@@ -85,10 +85,10 @@ class Object
     /**
      * Compute hash function for Object.
      */
-    size_t toHash() @trusted nothrow
+    size_t toHash() @trusted nothrow const
     {
         // BUG: this prevents a compacting GC from working, needs to be fixed
-        return cast(size_t)cast(void*)this;
+        return cast(size_t)cast(const void*)this;
     }
 
     /**
@@ -100,7 +100,7 @@ class Object
      *  $(TR $(TD this &gt; obj) $(TD &gt; 0))
      *  )
      */
-    int opCmp(Object o)
+    int opCmp(const Object o) const
     {
         // BUG: this prevents a compacting GC from working, needs to be fixed
         //return cast(int)cast(void*)this - cast(int)cast(void*)o;
@@ -112,7 +112,7 @@ class Object
     /**
      * Returns !=0 if this object does have the same contents as obj.
      */
-    bool opEquals(Object o)
+    bool opEquals(const Object o) const
     {
         return this is o;
     }
@@ -216,8 +216,7 @@ class TypeInfo
 {
     override string toString() const
     {
-        // hack to keep const qualifiers for TypeInfo member functions
-        return (cast()super).toString();
+        return super.toString();
     }
 
     override size_t toHash() @trusted const
@@ -232,21 +231,21 @@ class TypeInfo
             // This should never happen; remove when toString() is made nothrow
 
             // BUG: this prevents a compacting GC from working, needs to be fixed
-            return cast(size_t)cast(void*)this;
+            return cast(size_t)cast(const void*)this;
         }
     }
 
-    override int opCmp(Object o)
+    override int opCmp(const Object o) const
     {
         if (this is o)
             return 0;
-        TypeInfo ti = cast(TypeInfo)o;
+        auto ti = cast(const TypeInfo)o;
         if (ti is null)
             return 1;
         return dstrcmp(this.toString(), ti.toString());
     }
 
-    override bool opEquals(Object o)
+    override bool opEquals(const Object o) const
     {
         /* TypeInfo instances are singletons, but duplicates can exist
          * across DLL's. Therefore, comparing for a name match is
@@ -323,7 +322,7 @@ class TypeInfo_Typedef : TypeInfo
 {
     override string toString() const { return name; }
 
-    override bool opEquals(Object o)
+    override bool opEquals(const Object o) const
     {
         if (this is o)
             return true;
@@ -365,7 +364,7 @@ class TypeInfo_Pointer : TypeInfo
 {
     override string toString() const { return m_next.toString() ~ "*"; }
 
-    override bool opEquals(Object o)
+    override bool opEquals(const Object o) const
     {
         if (this is o)
             return true;
@@ -415,7 +414,7 @@ class TypeInfo_Array : TypeInfo
 {
     override string toString() const { return value.toString() ~ "[]"; }
 
-    override bool opEquals(Object o)
+    override bool opEquals(const Object o) const
     {
         if (this is o)
             return true;
@@ -504,7 +503,7 @@ class TypeInfo_StaticArray : TypeInfo
         return cast(string)(value.toString() ~ "[" ~ tmp.uintToString(len) ~ "]");
     }
 
-    override bool opEquals(Object o)
+    override bool opEquals(const Object o) const
     {
         if (this is o)
             return true;
@@ -622,7 +621,7 @@ class TypeInfo_AssociativeArray : TypeInfo
         return cast(string)(next.toString() ~ "[" ~ key.toString() ~ "]");
     }
 
-    override bool opEquals(Object o)
+    override bool opEquals(const Object o) const
     {
         if (this is o)
             return true;
@@ -667,7 +666,7 @@ class TypeInfo_Vector : TypeInfo
 {
     override string toString() const { return "__vector(" ~ base.toString() ~ ")"; }
 
-    override bool opEquals(Object o)
+    override bool opEquals(const Object o) const
     {
         if (this is o)
             return true;
@@ -702,7 +701,7 @@ class TypeInfo_Function : TypeInfo
         return cast(string)(next.toString() ~ "()");
     }
 
-    override bool opEquals(Object o)
+    override bool opEquals(const Object o) const
     {
         if (this is o)
             return true;
@@ -728,7 +727,7 @@ class TypeInfo_Delegate : TypeInfo
         return cast(string)(next.toString() ~ " delegate()");
     }
 
-    override bool opEquals(Object o)
+    override bool opEquals(const Object o) const
     {
         if (this is o)
             return true;
@@ -772,7 +771,7 @@ class TypeInfo_Class : TypeInfo
 {
     override string toString() const { return info.name; }
 
-    override bool opEquals(Object o)
+    override bool opEquals(const Object o) const
     {
         if (this is o)
             return true;
@@ -782,22 +781,22 @@ class TypeInfo_Class : TypeInfo
 
     override size_t getHash(in void* p) @trusted const
     {
-        auto o = *cast(Object*)p;
+        auto o = *cast(const Object*)p;
         return o ? o.toHash() : 0;
     }
 
     override bool equals(in void* p1, in void* p2) const
     {
-        Object o1 = *cast(Object*)p1;
-        Object o2 = *cast(Object*)p2;
+        auto o1 = *cast(const Object*)p1;
+        auto o2 = *cast(const Object*)p2;
 
         return (o1 is o2) || (o1 && o1.opEquals(o2));
     }
 
     override int compare(in void* p1, in void* p2) const
     {
-        Object o1 = *cast(Object*)p1;
-        Object o2 = *cast(Object*)p2;
+        auto o1 = *cast(const Object*)p1;
+        auto o2 = *cast(const Object*)p2;
         int c = 0;
 
         // Regard null references as always being "less than"
@@ -899,7 +898,7 @@ class TypeInfo_Interface : TypeInfo
 {
     override string toString() const { return info.name; }
 
-    override bool opEquals(Object o)
+    override bool opEquals(const Object o) const
     {
         if (this is o)
             return true;
@@ -909,28 +908,28 @@ class TypeInfo_Interface : TypeInfo
 
     override size_t getHash(in void* p) @trusted const
     {
-        Interface* pi = **cast(Interface ***)*cast(void**)p;
-        Object o = cast(Object)(*cast(void**)p - pi.offset);
+        Interface* pi = **cast(Interface ***)*cast(const void**)p;
+        auto o = cast(const Object)(*cast(const void**)p - pi.offset);
         assert(o);
         return o.toHash();
     }
 
     override bool equals(in void* p1, in void* p2) const
     {
-        Interface* pi = **cast(Interface ***)*cast(void**)p1;
-        Object o1 = cast(Object)(*cast(void**)p1 - pi.offset);
-        pi = **cast(Interface ***)*cast(void**)p2;
-        Object o2 = cast(Object)(*cast(void**)p2 - pi.offset);
+        Interface* pi = **cast(Interface ***)*cast(const void**)p1;
+        auto o1 = cast(const Object)(*cast(const void**)p1 - pi.offset);
+        pi = **cast(Interface ***)*cast(const void**)p2;
+        auto o2 = cast(const Object)(*cast(const void**)p2 - pi.offset);
 
         return o1 == o2 || (o1 && o1.opCmp(o2) == 0);
     }
 
     override int compare(in void* p1, in void* p2) const
     {
-        Interface* pi = **cast(Interface ***)*cast(void**)p1;
-        Object o1 = cast(Object)(*cast(void**)p1 - pi.offset);
-        pi = **cast(Interface ***)*cast(void**)p2;
-        Object o2 = cast(Object)(*cast(void**)p2 - pi.offset);
+        Interface* pi = **cast(Interface ***)*cast(const void**)p1;
+        auto o1 = cast(const Object)(*cast(const void**)p1 - pi.offset);
+        pi = **cast(Interface ***)*cast(const void**)p2;
+        auto o2 = cast(const Object)(*cast(const void**)p2 - pi.offset);
         int c = 0;
 
         // Regard null references as always being "less than"
@@ -963,7 +962,7 @@ class TypeInfo_Struct : TypeInfo
 {
     override string toString() const { return name; }
 
-    override bool opEquals(Object o)
+    override bool opEquals(const Object o) const
     {
         if (this is o)
             return true;
@@ -1105,7 +1104,7 @@ class TypeInfo_Tuple : TypeInfo
         return s;
     }
 
-    override bool opEquals(Object o)
+    override bool opEquals(const Object o) const
     {
         if (this is o)
             return true;
@@ -1177,7 +1176,7 @@ class TypeInfo_Const : TypeInfo
     }
 
     //override bool opEquals(Object o) { return base.opEquals(o); }
-    override bool opEquals(Object o)
+    override bool opEquals(const Object o) const
     {
         if (this is o)
             return true;
@@ -1185,7 +1184,7 @@ class TypeInfo_Const : TypeInfo
         if (typeid(this) != typeid(o))
             return false;
 
-        auto t = cast(TypeInfo_Const)o;
+        auto t = cast(const TypeInfo_Const)o;
         return base.opEquals(t.base);
     }
 
@@ -1342,7 +1341,7 @@ class Throwable : Object
         //this.info = _d_traceContext();
     }
 
-    override string toString()
+    override string toString() const
     {
         char[20] tmp = void;
         char[]   buf;

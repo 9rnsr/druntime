@@ -31,10 +31,10 @@ alias immutable(dchar)[] dstring;
 
 class Object
 {
-    string   toString();
-    size_t   toHash() @trusted nothrow;
-    int      opCmp(Object o);
-    bool     opEquals(Object o);
+    string   toString() const;
+    size_t   toHash() @trusted nothrow const;
+    int      opCmp(const Object o) const;
+    bool     opEquals(const Object o) const;
     bool     opEquals(Object lhs, Object rhs);
 
     interface Monitor
@@ -68,8 +68,8 @@ class TypeInfo
 {
     override string toString() const;
     override size_t toHash() @trusted const;
-    override int opCmp(Object o);
-    override bool opEquals(Object o);
+    override int opCmp(const Object o) const;
+    override bool opEquals(const Object o) const;
     size_t   getHash(in void* p) @trusted nothrow const;
     bool     equals(in void* p1, in void* p2) const;
     int      compare(in void* p1, in void* p2) const;
@@ -107,7 +107,7 @@ class TypeInfo_Pointer : TypeInfo
 class TypeInfo_Array : TypeInfo
 {
     override string toString() const;
-    override bool opEquals(Object o);
+    override bool opEquals(const Object o) const;
     override size_t getHash(in void* p) @trusted const;
     override bool equals(in void* p1, in void* p2) const;
     override int compare(in void* p1, in void* p2) const;
@@ -335,7 +335,7 @@ class Throwable : Object
 
     @safe pure nothrow this(string msg, Throwable next = null);
     @safe pure nothrow this(string msg, string file, size_t line, Throwable next = null);
-    override string toString();
+    override string toString() const;
 }
 
 

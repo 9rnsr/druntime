@@ -20,7 +20,7 @@ private import rt.util.hash;
 
 class TypeInfo_As : TypeInfo_Array
 {
-    override bool opEquals(Object o) { return TypeInfo.opEquals(o); }
+    override bool opEquals(const Object o) const { return TypeInfo.opEquals(o); }
 
     override string toString() const { return "short[]"; }
 

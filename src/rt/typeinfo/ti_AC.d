@@ -19,7 +19,7 @@ class TypeInfo_AC : TypeInfo_Array
 {
     override string toString() const { return TypeInfo.toString(); }
 
-    override bool opEquals(Object o) { return TypeInfo.opEquals(o); }
+    override bool opEquals(const Object o) const { return TypeInfo.opEquals(o); }
 
     override size_t getHash(in void* p) @trusted const
     {

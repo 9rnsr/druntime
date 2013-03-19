@@ -21,7 +21,7 @@ private import rt.util.string;
 
 class TypeInfo_Ag : TypeInfo_Array
 {
-    override bool opEquals(Object o) { return TypeInfo.opEquals(o); }
+    override bool opEquals(const Object o) const { return TypeInfo.opEquals(o); }
 
     override string toString() const { return "byte[]"; }
 
