@@ -46,8 +46,72 @@ class Object
     static Object factory(string classname);
 }
 
-bool opEquals(const Object lhs, const Object rhs);
-bool opEquals(Object lhs, Object rhs);
+/************************
+ * Returns true if lhs and rhs are equal.
+ */
+bool opEquals()(const Object lhs, const Object rhs)
+{
+    // FIXME: can change non-template after fixing bug 1528
+
+    // If aliased to the same object or both null => equal
+    if (lhs is rhs) return true;
+
+    // If either is null => non-equal
+    if (lhs is null || rhs is null) return false;
+
+    // If same exact type => one call to method opEquals
+    if (typeid(lhs) is typeid(rhs) || typeid(lhs).opEquals(typeid(rhs)))
+        return lhs.opEquals(rhs);
+
+    // General case => symmetric calls to method opEquals
+    return lhs.opEquals(rhs) && rhs.opEquals(lhs);
+}
+
+bool opEquals(L, R)(L lhs, R rhs)
+if (_hasMutableEquals!(L, R) || _hasMutableEquals!(R, L))
+// Either side is mutable, and both are acceptable each other
+{
+    if (lhs is rhs) return true;
+
+    if (lhs is null || rhs is null) return false;
+
+    static if (_hasMutableEquals!(L, R))    // prefer mutable 'this'
+        alias o1 = lhs, o2 = rhs;
+    else
+        alias o2 = lhs, o1 = rhs;
+
+    if (typeid(o1) is typeid(o2) || typeid(o1).opEquals(typeid(o2)))
+        return o1.opEquals(o2);
+
+    return o1.opEquals(o2) && o2.opEquals(o1);
+}
+template _hasMutableEquals(C, Ohs)
+{
+    enum _hasMutableEquals =
+        is(C : Object) &&    // C is mutable class
+        check!(typeof(__traits(getOverloads, C, "opEquals")));
+
+    template check(T...)
+    {
+        static if (T.length == 0)
+            enum check = false;
+        else
+            enum check = isMutableEquals!(T[0]) || check!(T[1..$]);
+    }
+    template isMutableEquals(F)
+    {
+        enum isMutableEquals =
+            !is(F == const) && !is(F == immutable) && !is(F == inout) && 
+            is(typeof({
+                static if (is(F PT == function))
+                {
+                    static assert(PT.length >= 1);
+                    static assert(is(PT[0] : const Object));    // can accept Object
+                    static assert(is(Ohs : PT[0])); // can accept opposite hand side
+                }
+            }));
+    }
+}
 
 void setSameMutex(shared Object ownee, shared Object owner);
 
