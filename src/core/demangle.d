@@ -279,6 +279,12 @@ private struct Demangle
             return buf[pos];
         return char.init;
     }
+    bool match2(const(char)[] tok)
+    {
+        if( pos + tok.length <= buf.length )
+            return buf[pos .. pos+tok.length] == tok[];
+        return false;
+    }
 
 
     void test( char val )
@@ -729,8 +735,26 @@ private struct Demangle
             }
         case 'A': // TypeArray (A Type)
             next();
-            parseType();
-            put( "[]" );
+            if( match2("ya") )
+            {
+                put( "string" );
+                pos += 2;
+            }
+            else if( match2("yu") )
+            {
+                put( "wstring" );
+                pos += 2;
+            }
+            else if( match2("yw") )
+            {
+                put( "dstring" );
+                pos += 2;
+            }
+            else
+            {
+                parseType();
+                put( "[]" );
+            }
             pad( name );
             return dst[beg .. len];
         case 'G': // TypeStaticArray (G Number Type)
