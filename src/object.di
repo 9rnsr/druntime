@@ -536,17 +536,20 @@ template _isStaticArray(T)
 private
 {
     extern (C) void _d_arrayshrinkfit(TypeInfo ti, void[] arr);
-    extern (C) size_t _d_arraysetcapacity(TypeInfo ti, size_t newcapacity, void *arrptr) pure nothrow;
+    extern (C) size_t _d_arraysetcapacity(TypeInfo ti, size_t newcapacity, void *arrptr) pure nothrow @trusted;
 }
 
-@property size_t capacity(T)(T[] arr) pure nothrow
+@property size_t capacity(T)(T[] arr) pure nothrow @trusted
 {
     return _d_arraysetcapacity(typeid(T[]), 0, cast(void *)&arr);
 }
 
-size_t reserve(T)(ref T[] arr, size_t newcapacity) pure nothrow @trusted
+size_t reserve(T)(ref T[] arr, size_t newcapacity)
 {
-    return _d_arraysetcapacity(typeid(T[]), newcapacity, cast(void *)&arr);
+    // infer attributes from postblit
+    if (__ctfe) T t = arr[0];
+
+    return ()@trusted { return _d_arraysetcapacity(typeid(T[]), newcapacity, cast(void*)&arr); }();
 }
 
 auto ref inout(T[]) assumeSafeAppend(T)(auto ref inout(T[]) arr)

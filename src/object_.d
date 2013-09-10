@@ -34,7 +34,7 @@ private
     extern (C) void onOutOfMemoryError();
     extern (C) Object _d_newclass(const TypeInfo_Class ci);
     extern (C) void _d_arrayshrinkfit(const TypeInfo ti, void[] arr);
-    extern (C) size_t _d_arraysetcapacity(const TypeInfo ti, size_t newcapacity, void *arrptr) pure nothrow;
+    extern (C) size_t _d_arraysetcapacity(const TypeInfo ti, size_t newcapacity, void *arrptr) pure nothrow @trusted;
     extern (C) void rt_finalize(void *data, bool det=true);
 }
 
@@ -2413,9 +2413,9 @@ version (unittest)
  *
  * Note: The capacity of a slice may be impacted by operations on other slices.
  */
-@property size_t capacity(T)(T[] arr) pure nothrow
+@property size_t capacity(T)(T[] arr) pure nothrow @trusted
 {
-    return _d_arraysetcapacity(typeid(T[]), 0, cast(void *)&arr);
+    return _d_arraysetcapacity(typeid(T[]), 0, cast(void*)&arr);
 }
 ///
 unittest
@@ -2444,10 +2444,15 @@ unittest
  *
  * The return value is the new capacity of the array (which may be larger than
  * the requested capacity).
+ *
+ * If $(D T) is a struct and has postblit, its attributes will be reflected.
  */
-size_t reserve(T)(ref T[] arr, size_t newcapacity) pure nothrow @trusted
+size_t reserve(T)(ref T[] arr, size_t newcapacity)
 {
-    return _d_arraysetcapacity(typeid(T[]), newcapacity, cast(void *)&arr);
+    // infer attributes from postblit
+    if (__ctfe) T t = arr[0];
+
+    return ()@trusted { return _d_arraysetcapacity(typeid(T[]), newcapacity, cast(void*)&arr); }();
 }
 ///
 unittest
