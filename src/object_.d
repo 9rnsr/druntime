@@ -2500,7 +2500,7 @@ unittest
  * Returns:
  *   The input is returned.
  */
-auto ref inout(T[]) assumeSafeAppend(T)(auto ref inout(T[]) arr)
+auto ref inout(T)[] assumeSafeAppend(T)(auto ref inout(T)[] arr)
 {
     _d_arrayshrinkfit(typeid(T[]), *(cast(void[]*)&arr));
     return arr;
@@ -2556,13 +2556,14 @@ unittest
     int[] a;
     immutable(int[]) b;
     auto a2 = &assumeSafeAppend(a);
-    auto b2 = &assumeSafeAppend(b);
+    static assert(!__traits(compiles, assumeSafeAppend(b))); // should not work
+    // assumeSafeAppend should not accept non-mutable array reference
     auto a3 = assumeSafeAppend(a[]);
     auto b3 = assumeSafeAppend(b[]);
-    assert(is(typeof(*a2) == int[]));
-    assert(is(typeof(*b2) == immutable(int[])));
-    assert(is(typeof(a3) == int[]));
-    assert(is(typeof(b3) == immutable(int[])));
+    static assert(is(typeof(*a2) == int[]));
+    //static assert(is(typeof(*b2) == immutable(int[])));
+    static assert(is(typeof(a3) == int[]));
+    static assert(is(typeof(b3) == immutable(int)[]));
 }
 
 version (none)

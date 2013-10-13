@@ -558,7 +558,7 @@ size_t reserve(T)(ref T[] arr, size_t newcapacity) pure nothrow @trusted
     return _d_arraysetcapacity(typeid(T[]), newcapacity, cast(void *)&arr);
 }
 
-auto ref inout(T[]) assumeSafeAppend(T)(auto ref inout(T[]) arr)
+auto ref inout(T)[] assumeSafeAppend(T)(auto ref inout(T)[] arr)
 {
     _d_arrayshrinkfit(typeid(T[]), *(cast(void[]*)&arr));
     return arr;
