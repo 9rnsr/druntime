@@ -150,6 +150,7 @@ SRCS=\
 	src\rt\typeinfo\ti_long.d \
 	src\rt\typeinfo\ti_ptr.d \
 	src\rt\typeinfo\ti_real.d \
+	src\rt\typeinfo\ti_S.d \
 	src\rt\typeinfo\ti_short.d \
 	src\rt\typeinfo\ti_ubyte.d \
 	src\rt\typeinfo\ti_uint.d \
