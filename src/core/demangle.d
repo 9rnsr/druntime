@@ -1290,7 +1290,8 @@ private struct Demangle
     TemplateArg:
         T Type
         V Type Value
-        S LName
+        S QualifiedName
+        S MangledName
     */
     void parseTemplateArgs()
     {
@@ -1320,7 +1321,20 @@ private struct Demangle
             case 'S':
                 next();
                 if( n ) put( ", " );
-                parseQualifiedName();
+                auto savepos = pos;
+                auto num = decodeNumber(sliceNumber());
+                if (num > 2 && pos + num < buf.length && buf[pos] == '_' && buf[pos+1] == 'D' && pos + num < buf.length)
+                {
+                    auto savebuf = buf;
+                    buf = buf[0 .. pos + num];
+                    parseMangledName();
+                    buf = savebuf;
+                }
+                else
+                {
+                    pos = savepos;
+                    parseQualifiedName();
+                }
                 continue;
             default:
                 return;
