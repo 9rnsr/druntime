@@ -25,45 +25,45 @@ version (unittest)
     /* This is so unit tests will test every CPU variant
      */
     uint cpuid;
-    enum CPUID_MAX = 14;
-    @property bool mmx()                { return cpuid == 1 && core.cpuid.mmx; }
-    @property bool sse()                { return cpuid == 2 && core.cpuid.sse; }
-    @property bool sse2()               { return cpuid == 3 && core.cpuid.sse2; }
-    @property bool sse3()               { return cpuid == 4 && core.cpuid.sse3; }
-    @property bool sse41()              { return cpuid == 5 && core.cpuid.sse41; }
-    @property bool sse42()              { return cpuid == 6 && core.cpuid.sse42; }
-    @property bool sse4a()              { return cpuid == 7 && core.cpuid.sse4a; }
-    @property bool avx()                { return cpuid == 8 && core.cpuid.avx; }
-    @property bool avx2()               { return cpuid == 9 && core.cpuid.avx2; }
-    @property bool amd3dnow()           { return cpuid == 10 && core.cpuid.amd3dnow; }
-    @property bool and3dnowExt()        { return cpuid == 11 && core.cpuid.amd3dnowExt; }
-    @property bool amdMmx()             { return cpuid == 12 && core.cpuid.amdMmx; }
-    @property bool has3dnowPrefetch()   { return cpuid == 13 && core.cpuid.has3dnowPrefetch; }
+    enum int CPUID_MAX = 14;
+    @property nothrow bool mmx()                { return cpuid == 1 && core.cpuid.mmx; }
+    @property nothrow bool sse()                { return cpuid == 2 && core.cpuid.sse; }
+    @property nothrow bool sse2()               { return cpuid == 3 && core.cpuid.sse2; }
+    @property nothrow bool sse3()               { return cpuid == 4 && core.cpuid.sse3; }
+    @property nothrow bool sse41()              { return cpuid == 5 && core.cpuid.sse41; }
+    @property nothrow bool sse42()              { return cpuid == 6 && core.cpuid.sse42; }
+    @property nothrow bool sse4a()              { return cpuid == 7 && core.cpuid.sse4a; }
+    @property nothrow bool avx()                { return cpuid == 8 && core.cpuid.avx; }
+    @property nothrow bool avx2()               { return cpuid == 9 && core.cpuid.avx2; }
+    @property nothrow bool amd3dnow()           { return cpuid == 10 && core.cpuid.amd3dnow; }
+    @property nothrow bool and3dnowExt()        { return cpuid == 11 && core.cpuid.amd3dnowExt; }
+    @property nothrow bool amdMmx()             { return cpuid == 12 && core.cpuid.amdMmx; }
+    @property nothrow bool has3dnowPrefetch()   { return cpuid == 13 && core.cpuid.has3dnowPrefetch; }
 }
 else
 {
     version(X86_64) //guaranteed on x86_64
     {
-        enum mmx = true;
-        enum sse = true;
+        enum mmx  = true;
+        enum sse  = true;
         enum sse2 = true;
     }
     else
     {
-        alias core.cpuid.mmx mmx;
-        alias core.cpuid.sse sse;
-        alias core.cpuid.sse2 sse2;
+        alias mmx  = core.cpuid.mmx;
+        alias sse  = core.cpuid.sse;
+        alias sse2 = core.cpuid.sse2;
     }
-    alias core.cpuid.sse3 sse3;
-    alias core.cpuid.sse41 sse41;
-    alias core.cpuid.sse42 sse42;
-    alias core.cpuid.sse4a sse4a;
-    alias core.cpuid.avx avx;
-    alias core.cpuid.avx2 avx2;
-    alias core.cpuid.amd3dnow amd3dnow;
-    alias core.cpuid.amd3dnowExt and3dnowExt;
-    alias core.cpuid.amdMmx amdMmx;
-    alias core.cpuid.has3dnowPrefetch has3dnowPrefetch;
+    alias sse3             = core.cpuid.sse3;
+    alias sse41            = core.cpuid.sse41;
+    alias sse42            = core.cpuid.sse42;
+    alias sse4a            = core.cpuid.sse4a;
+    alias avx              = core.cpuid.avx;
+    alias avx2             = core.cpuid.avx2;
+    alias amd3dnow         = core.cpuid.amd3dnow;
+    alias and3dnowExt      = core.cpuid.amd3dnowExt;
+    alias amdMmx           = core.cpuid.amdMmx;
+    alias has3dnowPrefetch = core.cpuid.has3dnowPrefetch;
 }
 
 //version = log;

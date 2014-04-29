@@ -24,18 +24,18 @@ version (unittest)
     /* This is so unit tests will test every CPU variant
      */
     int cpuid;
-    const int CPUID_MAX = 5;
-    @property bool mmx()      { return cpuid == 1 && core.cpuid.mmx; }
-    @property bool sse()      { return cpuid == 2 && core.cpuid.sse; }
-    @property bool sse2()     { return cpuid == 3 && core.cpuid.sse2; }
-    @property bool amd3dnow() { return cpuid == 4 && core.cpuid.amd3dnow; }
+    enum int CPUID_MAX = 5;
+    @property nothrow bool mmx()      { return cpuid == 1 && core.cpuid.mmx; }
+    @property nothrow bool sse()      { return cpuid == 2 && core.cpuid.sse; }
+    @property nothrow bool sse2()     { return cpuid == 3 && core.cpuid.sse2; }
+    @property nothrow bool amd3dnow() { return cpuid == 4 && core.cpuid.amd3dnow; }
 }
 else
 {
-    alias core.cpuid.mmx mmx;
-    alias core.cpuid.sse sse;
-    alias core.cpuid.sse2 sse2;
-    alias core.cpuid.amd3dnow amd3dnow;
+    alias mmx      = core.cpuid.mmx;
+    alias sse      = core.cpuid.sse;
+    alias sse2     = core.cpuid.sse2;
+    alias amd3dnow = core.cpuid.amd3dnow;
 }
 
 //version = log;
