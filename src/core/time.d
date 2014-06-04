@@ -1280,7 +1280,7 @@ private:
       +/
     string _toStringImpl() @safe const pure nothrow
     {
-        static void appListSep(ref string res, uint pos, bool last) nothrow
+        static void appListSep(ref string res, uint pos, bool last) @safe pure nothrow
         {
             if (pos == 0)
                 return;
