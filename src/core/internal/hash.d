@@ -105,7 +105,7 @@ size_t hashOf(T)(auto ref T val, size_t seed = 0) if (!is(T == enum) && is(T V :
 }
 
 //struct or union hash
-@trusted nothrow pure
+@trusted nothrow
 size_t hashOf(T)(auto ref T val, size_t seed = 0) if (!is(T == enum) && (is(T == struct) || is(T == union)))
 {
     static if (is(typeof(val.toHash()) == size_t)) //CTFE depends on toHash()
