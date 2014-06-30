@@ -11,6 +11,8 @@ module core.internal.hash;
 
 import core.internal.convert;
 
+private enum bool isAggregate(T) = is(T == struct) || is(T == class) || is(T == interface) || is(T == union);
+
 //enum hash. CTFE depends on base type
 @trusted nothrow
 size_t hashOf(T)(auto ref T val, size_t seed = 0) if (is(T == enum))
@@ -40,7 +42,8 @@ size_t hashOf(T)(auto ref T val, size_t seed = 0) if (!is(T == enum) && __traits
 
 //dynamic array hash
 @trusted nothrow
-size_t hashOf(T)(auto ref T val, size_t seed = 0) if (!is(T == enum) && is(T S: S[]) && !__traits(isStaticArray, T))
+size_t hashOf(T)(auto ref T val, size_t seed = 0)
+if (!is(T == enum) && !isAggregate!T && is(T S: S[]) && !__traits(isStaticArray, T))
 {
     alias ElementType = typeof(val[0]);
     static if (is(ElementType == interface) || is(ElementType == class) ||
