@@ -2668,6 +2668,11 @@ bool _xopCmp(in void*, in void*)
     throw new Error("TypeInfo.compare is not implemented");
 }
 
+hash_t _xtoHash(in void*) nothrow @safe
+{
+    throw new Error("TypeInfo.getHash is not implemented");
+}
+
 /******************************************
  * Create RTInfo for type T
  */
