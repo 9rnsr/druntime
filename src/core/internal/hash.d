@@ -11,15 +11,19 @@ module core.internal.hash;
 
 import core.internal.convert;
 
-private enum bool isAggregate(T) = is(T == struct) || is(T == class) || is(T == interface) || is(T == union);
+@trusted nothrow:
 
-//enum hash. CTFE depends on base type
-@trusted nothrow
-size_t hashOf(T)(auto ref T val, size_t seed = 0) if (is(T == enum))
+private enum bool isAggregate(T)    = is(T == struct) || is(T == class) || is(T == interface) || is(T == union);
+private enum bool isDynamicArray(T) = !isAggregate!T && is(T : U[], U) && !__traits(isStaticArray, T);
+private enum bool isPointer(T)      = !isAggregate!T && is(T : U*, U);
+
+// enum hash. CTFE depends on base type
+size_t hashOf(T)(auto ref T val, size_t seed = 0)
+if (is(T == enum))
 {
-    static if (is(T EType == enum)) //for EType
+    static if (is(T BaseType == enum)) // for BaseType
     {
-        EType e_val = cast(EType)val;
+        BaseType e_val = cast(BaseType)val;
         return hashOf(e_val, seed);
     }
     else
@@ -28,9 +32,9 @@ size_t hashOf(T)(auto ref T val, size_t seed = 0) if (is(T == enum))
     }
 }
 
-//CTFE ready (depends on base type). Can be merged with dynamic array hash
-@trusted nothrow
-size_t hashOf(T)(auto ref T val, size_t seed = 0) if (!is(T == enum) && __traits(isStaticArray, T))
+// CTFE ready (depends on base type). Can be merged with dynamic array hash
+size_t hashOf(T)(auto ref T val, size_t seed = 0)
+if (!is(T == enum) && __traits(isStaticArray, T))
 {
     size_t cur_hash = seed;
     foreach (ref cur; val)
@@ -40,17 +44,16 @@ size_t hashOf(T)(auto ref T val, size_t seed = 0) if (!is(T == enum) && __traits
     return cur_hash;
 }
 
-//dynamic array hash
-@trusted nothrow
+// dynamic array hash
 size_t hashOf(T)(auto ref T val, size_t seed = 0)
-if (!is(T == enum) && !isAggregate!T && is(T S: S[]) && !__traits(isStaticArray, T))
+if (!is(T == enum) && isDynamicArray!T)
 {
-    alias ElementType = typeof(val[0]);
-    static if (is(ElementType == interface) || is(ElementType == class) ||
-                   ((is(ElementType == struct) || is(ElementType == union))
-                       && is(typeof(val[0].toHash()) == size_t)))
-    //class or interface array or struct array with toHash(); CTFE depend on toHash() method
+    alias E = typeof(val[0]);
+    static if (is(E == interface) ||
+               is(E == class) ||
+               ((is(E == struct) || is(E == union)) && is(typeof(val[0].toHash()) == size_t)))
     {
+        // class or interface array or struct array with toHash(); CTFE depend on toHash() method
         size_t hash = seed;
         foreach (o; val)
         {
@@ -59,23 +62,25 @@ if (!is(T == enum) && !isAggregate!T && is(T S: S[]) && !__traits(isStaticArray,
         return hash;
     }
     else static if (is(typeof(toUbyte(val)) == const(ubyte)[]))
-    //ubyteble array (arithmetic types and structs without toHash) CTFE ready for arithmetic types and structs without reference fields
     {
+        // ubyteble array (arithmetic types and structs without toHash)
+        // CTFE ready for arithmetic types and structs without reference fields
         auto bytes = toUbyte(val);
         return bytesHash(bytes.ptr, bytes.length, seed);
     }
-    else //Other types. CTFE unsupported
+    else
     {
+        // Other types. CTFE unsupported
         assert(!__ctfe, "unable to compute hash of "~T.stringof);
-        return bytesHash(cast(void*)val.ptr, ElementType.sizeof*val.length, seed);
+        return bytesHash(cast(void*)val.ptr, E.sizeof * val.length, seed);
     }
 }
 
-//arithmetic type hash
-@trusted nothrow pure
-size_t hashOf(T)(auto ref T val, size_t seed = 0) if (!is(T == enum) && __traits(isArithmetic, T))
+// arithmetic type hash
+pure size_t hashOf(T)(auto ref T val, size_t seed = 0)
+if (!is(T == enum) && __traits(isArithmetic, T))
 {
-    static if(__traits(isFloating, val))
+    static if (__traits(isFloating, val))
     {
         T data = (val != val) ? T.nan : val;
         auto bytes = toUbyte(data);
@@ -88,91 +93,83 @@ size_t hashOf(T)(auto ref T val, size_t seed = 0) if (!is(T == enum) && __traits
     }
 }
 
-//Pointers hash. CTFE unsupported if not null
-@trusted nothrow pure
-size_t hashOf(T)(auto ref T val, size_t seed = 0) if (!is(T == enum) && is(T V : V*))
+// pointers hash. CTFE unsupported if not null
+pure size_t hashOf(T)(auto ref T val, size_t seed = 0)
+if (!is(T == enum) && isPointer!T)
 {
-    if(__ctfe)
+    if (__ctfe)
     {
-        if(val is null)
-        {
+        if (val is null)
             return hashOf(cast(size_t)0);
-        }
-        else
-        {
-            assert(0, "Unable to calculate hash of non-null pointer at compile time");
-        }
 
+        assert(0, "Unable to calculate hash of non-null pointer at compile time");
     }
     return hashOf(cast(size_t)val);
 }
 
-//struct or union hash
-@trusted nothrow
-size_t hashOf(T)(auto ref T val, size_t seed = 0) if (!is(T == enum) && (is(T == struct) || is(T == union)))
+// struct or union hash
+size_t hashOf(T)(auto ref T val, size_t seed = 0)
+if (is(T == struct) || is(T == union))
 {
-    static if (is(typeof(val.toHash()) == size_t)) //CTFE depends on toHash()
+    static if (is(typeof(val.toHash()) == size_t))
     {
+        // CTFE depends on toHash()
         return seedHash(val.toHash(), seed);
+    }
+    else static if (__traits(hasMember, T, "toHash") && is(typeof(T.toHash) == function))
+    {
+        static assert(0,
+            "Error: struct "~__traits(identifier, T)~" has method toHash"
+            ~", however it cannot be called with "~T.stringof~" this.");
+    }
+    else static if (is(typeof(toUbyte(val)) == const(ubyte)[]))
+    {
+        // CTFE ready for structs without reference fields
+        auto bytes = toUbyte(val);
+        return bytesHash(bytes.ptr, bytes.length, seed);
     }
     else
     {
-        static assert(!(__traits(hasMember, T, "toHash") && is(typeof(T.toHash) == function)),
-            "Error: struct "~__traits(identifier, T)~" has method toHash, however it cannot be called with "~T.stringof~" this.");
-
-        static if (is(typeof(toUbyte(val)) == const(ubyte)[]))//CTFE ready for structs without reference fields
-        {
-            auto bytes = toUbyte(val);
-            return bytesHash(bytes.ptr, bytes.length, seed);
-        }
-        else // CTFE unsupproreted for structs with reference fields
-        {
-            assert(!__ctfe, "unable to compute hash of "~T.stringof);
-            const(ubyte)[] bytes = (cast(const(ubyte)*)&val)[0 .. T.sizeof];
-            return bytesHash(bytes.ptr, bytes.length, seed);
-        }
+        // CTFE unsupproreted for structs with reference fields
+        assert(!__ctfe, "unable to compute hash of "~T.stringof);
+        const(ubyte)[] bytes = (cast(const(ubyte)*)&val)[0 .. T.sizeof];
+        return bytesHash(bytes.ptr, bytes.length, seed);
     }
 }
 
-//delegate hash. CTFE unsupported
-@trusted nothrow pure
-size_t hashOf(T)(auto ref T val, size_t seed = 0) if (!is(T == enum) && is(T == delegate))
+// delegate hash. CTFE unsupported
+pure size_t hashOf(T)(auto ref T val, size_t seed = 0)
+if (is(T == delegate))
 {
     assert(!__ctfe, "unable to compute hash of "~T.stringof);
-    const(ubyte)[] bytes = (cast(const(ubyte)*)&val)[0 .. T.sizeof];
+    const(ubyte)[] bytes = (cast(const ubyte*)&val)[0 .. T.sizeof];
     return bytesHash(bytes.ptr, bytes.length, seed);
 }
 
-//class or interface hash. CTFE depends on toHash
-@trusted nothrow
-size_t hashOf(T)(auto ref T val, size_t seed = 0) if (!is(T == enum) && is(T == interface) || is(T == class))
+// class or interface hash. CTFE depends on toHash
+size_t hashOf(T)(auto ref T val, size_t seed = 0)
+if (is(T == interface) || is(T == class))
 {
     return seedHash(val ? (cast(Object)val).toHash() : 0, seed);
 }
 
-//associative array hash. CTFE depends on base types
-@trusted nothrow
-size_t hashOf(T)(auto ref T aa, size_t seed = 0) if (!is(T == enum) && __traits(isAssociativeArray, T))
+// associative array hash. CTFE depends on base types
+size_t hashOf(T)(auto ref T aa, size_t seed = 0)
+if (!is(T == enum) && __traits(isAssociativeArray, T))
 {
-    try
-    {
-        if (!aa.length) return seedHash(0, seed);
-        size_t h = 0;
+    scope(failure) assert(0);
 
-        // The computed hash is independent of the foreach traversal order.
-        foreach (key, val; aa)
-        {
-            size_t[2] hpair;
-            hpair[0] = key.hashOf();
-            hpair[1] = val.hashOf();
-            h ^= hpair.hashOf();
-        }
-        return seedHash(h, seed);
-    }
-    catch (Throwable thr)
+    if (!aa.length)
+        return seedHash(0, seed);
+
+    // The computed hash is independent of the foreach traversal order.
+    size_t h = 0;
+    foreach (key, val; aa)
     {
-        assert(0);
+        size_t[2] hpair = [key.hashOf(), val.hashOf()];
+        h ^= hpair.hashOf();
     }
+    return seedHash(h, seed);
 }
 
 unittest
@@ -394,7 +391,6 @@ unittest
 }
 
 
-
 // MurmurHash3 was written by Austin Appleby, and is placed in the public
 // domain. The author hereby disclaims copyright to this source code.
 
@@ -414,8 +410,7 @@ version(AnyX86)
     }
 }
 
-@trusted pure nothrow
-size_t bytesHash(const(void)* buf, size_t len, size_t seed = 0)
+pure size_t bytesHash(const(void)* buf, size_t len, size_t seed = 0)
 {
     static uint rotl32(uint n)(in uint x) pure nothrow @safe
     {
@@ -501,9 +496,7 @@ size_t bytesHash(const(void)* buf, size_t len, size_t seed = 0)
     return h1;
 }
 
-
-@trusted pure nothrow
-private size_t seedHash( size_t hash, size_t seed)
+private pure size_t seedHash( size_t hash, size_t seed)
 {
     auto h = hash.toUbyte();
     return bytesHash(h.ptr, h.length, seed);
@@ -521,6 +514,3 @@ unittest
     enum size_t hashVal = ctfeHash(test_str);
     assert(hashVal == bytesHash(test_str.ptr, test_str.length));
 }
-
-
-
