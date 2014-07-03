@@ -66,7 +66,7 @@ size_t hashOf(T)(auto ref T val, size_t seed = 0) if (!is(T == enum) && is(T S: 
     {
         // Other types. CTFE unsupported
         assert(!__ctfe, "unable to compute hash of "~T.stringof);
-        return bytesHash(val.ptr, E.sizeof*val.length, seed);
+        return bytesHash(val.ptr, E.sizeof * val.length, seed);
     }
 }
 
