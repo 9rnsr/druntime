@@ -2978,11 +2978,11 @@ unittest
     static assert( __traits(compiles, ()         { [].dup!Sunsafe; }));
     static assert(!__traits(compiles, () @safe   { [].dup!Sunsafe; }));
 
-    static assert( __traits(compiles, ()         { [].idup!Sunpure; }));
+    //static assert( __traits(compiles, ()         { [].idup!Sunpure; }));
     static assert(!__traits(compiles, () pure    { [].idup!Sunpure; }));
-    static assert( __traits(compiles, ()         { [].idup!Sthrow; }));
+    //static assert( __traits(compiles, ()         { [].idup!Sthrow; }));
     static assert(!__traits(compiles, () nothrow { [].idup!Sthrow; }));
-    static assert( __traits(compiles, ()         { [].idup!Sunsafe; }));
+    //static assert( __traits(compiles, ()         { [].idup!Sunsafe; }));
     static assert(!__traits(compiles, () @safe   { [].idup!Sunsafe; }));
 }
 
