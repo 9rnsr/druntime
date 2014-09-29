@@ -342,6 +342,8 @@ public:
         if( !entry )
             return false;
 
+        scope(failure) assert(0);   // assume that the enumProcessThreads function call is nothrow
+
         if( !enumProcessThreads(
             function (uint id, void* context) nothrow {
                 dll_aux.LdrpTlsListEntry* entry = cast(dll_aux.LdrpTlsListEntry*) context;

@@ -26,17 +26,17 @@ version (unittest)
      */
     int cpuid;
     const int CPUID_MAX = 5;
-    @property bool mmx()      { return cpuid == 1 && core.cpuid.mmx; }
-    @property bool sse()      { return cpuid == 2 && core.cpuid.sse; }
-    @property bool sse2()     { return cpuid == 3 && core.cpuid.sse2; }
-    @property bool amd3dnow() { return cpuid == 4 && core.cpuid.amd3dnow; }
+    @property bool mmx()      nothrow { return cpuid == 1 && core.cpuid.mmx; }
+    @property bool sse()      nothrow { return cpuid == 2 && core.cpuid.sse; }
+    @property bool sse2()     nothrow { return cpuid == 3 && core.cpuid.sse2; }
+    @property bool amd3dnow() nothrow { return cpuid == 4 && core.cpuid.amd3dnow; }
 }
 else
 {
-    alias core.cpuid.mmx mmx;
-    alias core.cpuid.sse sse;
-    alias core.cpuid.sse2 sse2;
-    alias core.cpuid.amd3dnow amd3dnow;
+    alias mmx       = core.cpuid.mmx;
+    alias sse       = core.cpuid.sse;
+    alias sse2      = core.cpuid.sse2;
+    alias amd3dnow  = core.cpuid.amd3dnow;
 }
 
 //version = log;
@@ -44,7 +44,7 @@ else
 /* Performance figures measured by Burton Radons
  */
 
-alias double T;
+alias T = double;
 
 extern (C) @trusted nothrow:
 

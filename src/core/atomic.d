@@ -224,7 +224,7 @@ else version( AsmX86_32 )
         return casImpl(here, ifThis, writeThis);
     }
 
-    private bool casImpl(T,V1,V2)( shared(T)* here, V1 ifThis, V2 writeThis ) nothrow
+    private bool casImpl(T,V1,V2)( shared(T)* here, V1 ifThis, V2 writeThis ) pure nothrow @nogc /*@trusted*/
     in
     {
         // NOTE: 32 bit x86 systems support 8 byte CAS, which only requires
@@ -362,7 +362,7 @@ else version( AsmX86_32 )
     }
 
 
-    HeadUnshared!(T) atomicLoad(MemoryOrder ms = MemoryOrder.seq, T)( ref const shared T val ) nothrow
+    HeadUnshared!(T) atomicLoad(MemoryOrder ms = MemoryOrder.seq, T)( ref const shared T val ) pure nothrow @nogc /*@trusted*/
     if(!__traits(isFloating, T))
     {
         static if (!__traits(isPOD, T))
@@ -474,7 +474,7 @@ else version( AsmX86_32 )
         }
     }
 
-    void atomicStore(MemoryOrder ms = MemoryOrder.seq, T, V1)( ref shared T val, V1 newval ) nothrow
+    void atomicStore(MemoryOrder ms = MemoryOrder.seq, T, V1)( ref shared T val, V1 newval ) pure nothrow @nogc /*@trusted*/
         if( __traits( compiles, { val = newval; } ) )
     {
         static if( T.sizeof == byte.sizeof )
@@ -693,7 +693,7 @@ else version( AsmX86_64 )
         return casImpl(here, ifThis, writeThis);
     }
 
-    private bool casImpl(T,V1,V2)( shared(T)* here, V1 ifThis, V2 writeThis ) nothrow
+    private bool casImpl(T,V1,V2)( shared(T)* here, V1 ifThis, V2 writeThis ) pure nothrow @nogc /*@trusted*/
     in
     {
         // NOTE: 32 bit x86 systems support 8 byte CAS, which only requires
@@ -823,8 +823,9 @@ else version( AsmX86_64 )
     }
 
 
-    HeadUnshared!(T) atomicLoad(MemoryOrder ms = MemoryOrder.seq, T)( ref const shared T val ) nothrow
-    if(!__traits(isFloating, T)) {
+    HeadUnshared!(T) atomicLoad(MemoryOrder ms = MemoryOrder.seq, T)( ref const shared T val ) pure nothrow @nogc /*@trusted*/
+    if(!__traits(isFloating, T))
+    {
         static if( T.sizeof == byte.sizeof )
         {
             //////////////////////////////////////////////////////////////////
@@ -936,7 +937,7 @@ else version( AsmX86_64 )
     }
 
 
-    void atomicStore(MemoryOrder ms = MemoryOrder.seq, T, V1)( ref shared T val, V1 newval ) nothrow
+    void atomicStore(MemoryOrder ms = MemoryOrder.seq, T, V1)( ref shared T val, V1 newval ) pure nothrow @nogc /*@trusted*/
         if( __traits( compiles, { val = newval; } ) )
     {
         static if( T.sizeof == byte.sizeof )
