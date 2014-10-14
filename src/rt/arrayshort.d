@@ -54,17 +54,17 @@ extern (C) @trusted nothrow:
  *      a[] = b[] + value
  */
 
-T[] _arraySliceExpAddSliceAssign_u(T[] a, T value, T[] b)
+T[] _arraySliceExpAddSliceAssign_u(T[] b, T value, T[] a)
 {
-    return _arraySliceExpAddSliceAssign_s(a, value, b);
+    return _arraySliceExpAddSliceAssign_s(b, value, a);
 }
 
-T[] _arraySliceExpAddSliceAssign_t(T[] a, T value, T[] b)
+T[] _arraySliceExpAddSliceAssign_t(T[] b, T value, T[] a)
 {
-    return _arraySliceExpAddSliceAssign_s(a, value, b);
+    return _arraySliceExpAddSliceAssign_s(b, value, a);
 }
 
-T[] _arraySliceExpAddSliceAssign_s(T[] a, T value, T[] b)
+T[] _arraySliceExpAddSliceAssign_s(T[] b, T value, T[] a)
 {
     enforceTypedArraysConformable("vector operation", a, b);
 
@@ -292,17 +292,17 @@ unittest
  *      a[] = b[] + c[]
  */
 
-T[] _arraySliceSliceAddSliceAssign_u(T[] a, T[] c, T[] b)
+T[] _arraySliceSliceAddSliceAssign_u(T[] b, T[] c, T[] a)
 {
-    return _arraySliceSliceAddSliceAssign_s(a, c, b);
+    return _arraySliceSliceAddSliceAssign_s(b, c, a);
 }
 
-T[] _arraySliceSliceAddSliceAssign_t(T[] a, T[] c, T[] b)
+T[] _arraySliceSliceAddSliceAssign_t(T[] b, T[] c, T[] a)
 {
-    return _arraySliceSliceAddSliceAssign_s(a, c, b);
+    return _arraySliceSliceAddSliceAssign_s(b, c, a);
 }
 
-T[] _arraySliceSliceAddSliceAssign_s(T[] a, T[] c, T[] b)
+T[] _arraySliceSliceAddSliceAssign_s(T[] b, T[] c, T[] a)
 {
     enforceTypedArraysConformable("vector operation", a, b);
     enforceTypedArraysConformable("vector operation", a, c);
@@ -539,17 +539,17 @@ unittest
  *      a[] += value
  */
 
-T[] _arrayExpSliceAddass_u(T[] a, T value)
+T[] _arrayExpSliceAddass_u(T value, T[] a)
 {
-    return _arrayExpSliceAddass_s(a, value);
+    return _arrayExpSliceAddass_s(value, a);
 }
 
-T[] _arrayExpSliceAddass_t(T[] a, T value)
+T[] _arrayExpSliceAddass_t(T value, T[] a)
 {
-    return _arrayExpSliceAddass_s(a, value);
+    return _arrayExpSliceAddass_s(value, a);
 }
 
-T[] _arrayExpSliceAddass_s(T[] a, T value)
+T[] _arrayExpSliceAddass_s(T value, T[] a)
 {
     //printf("_arrayExpSliceAddass_s(a.length = %d, value = %Lg)\n", a.length, cast(real)value);
     auto aptr = a.ptr;
@@ -760,17 +760,17 @@ unittest
  *      a[] += b[]
  */
 
-T[] _arraySliceSliceAddass_u(T[] a, T[] b)
+T[] _arraySliceSliceAddass_u(T[] b, T[] a)
 {
-    return _arraySliceSliceAddass_s(a, b);
+    return _arraySliceSliceAddass_s(b, a);
 }
 
-T[] _arraySliceSliceAddass_t(T[] a, T[] b)
+T[] _arraySliceSliceAddass_t(T[] b, T[] a)
 {
-    return _arraySliceSliceAddass_s(a, b);
+    return _arraySliceSliceAddass_s(b, a);
 }
 
-T[] _arraySliceSliceAddass_s(T[] a, T[] b)
+T[] _arraySliceSliceAddass_s(T[] b, T[] a)
 {
     enforceTypedArraysConformable("vector operation", a, b);
 
@@ -991,17 +991,17 @@ unittest
  *      a[] = b[] - value
  */
 
-T[] _arraySliceExpMinSliceAssign_u(T[] a, T value, T[] b)
+T[] _arraySliceExpMinSliceAssign_u(T[] b, T value, T[] a)
 {
-    return _arraySliceExpMinSliceAssign_s(a, value, b);
+    return _arraySliceExpMinSliceAssign_s(b, value, a);
 }
 
-T[] _arraySliceExpMinSliceAssign_t(T[] a, T value, T[] b)
+T[] _arraySliceExpMinSliceAssign_t(T[] b, T value, T[] a)
 {
-    return _arraySliceExpMinSliceAssign_s(a, value, b);
+    return _arraySliceExpMinSliceAssign_s(b, value, a);
 }
 
-T[] _arraySliceExpMinSliceAssign_s(T[] a, T value, T[] b)
+T[] _arraySliceExpMinSliceAssign_s(T[] b, T value, T[] a)
 {
     enforceTypedArraysConformable("vector operation", a, b);
 
@@ -1263,17 +1263,17 @@ unittest
  *      a[] = value - b[]
  */
 
-T[] _arrayExpSliceMinSliceAssign_u(T[] a, T[] b, T value)
+T[] _arrayExpSliceMinSliceAssign_u(T value, T[] b, T[] a)
 {
-    return _arrayExpSliceMinSliceAssign_s(a, b, value);
+    return _arrayExpSliceMinSliceAssign_s(value, b, a);
 }
 
-T[] _arrayExpSliceMinSliceAssign_t(T[] a, T[] b, T value)
+T[] _arrayExpSliceMinSliceAssign_t(T value, T[] b, T[] a)
 {
-    return _arrayExpSliceMinSliceAssign_s(a, b, value);
+    return _arrayExpSliceMinSliceAssign_s(value, b, a);
 }
 
-T[] _arrayExpSliceMinSliceAssign_s(T[] a, T[] b, T value)
+T[] _arrayExpSliceMinSliceAssign_s(T value, T[] b, T[] a)
 {
     enforceTypedArraysConformable("vector operation", a, b);
 
@@ -1511,17 +1511,17 @@ unittest
  *      a[] = b[] - c[]
  */
 
-T[] _arraySliceSliceMinSliceAssign_u(T[] a, T[] c, T[] b)
+T[] _arraySliceSliceMinSliceAssign_u(T[] b, T[] c, T[] a)
 {
-    return _arraySliceSliceMinSliceAssign_s(a, c, b);
+    return _arraySliceSliceMinSliceAssign_s(b, c, a);
 }
 
-T[] _arraySliceSliceMinSliceAssign_t(T[] a, T[] c, T[] b)
+T[] _arraySliceSliceMinSliceAssign_t(T[] b, T[] c, T[] a)
 {
-    return _arraySliceSliceMinSliceAssign_s(a, c, b);
+    return _arraySliceSliceMinSliceAssign_s(b, c, a);
 }
 
-T[] _arraySliceSliceMinSliceAssign_s(T[] a, T[] c, T[] b)
+T[] _arraySliceSliceMinSliceAssign_s(T[] b, T[] c, T[] a)
 {
     enforceTypedArraysConformable("vector operation", a, b);
     enforceTypedArraysConformable("vector operation", a, c);
@@ -1757,17 +1757,17 @@ unittest
  *      a[] -= value
  */
 
-T[] _arrayExpSliceMinass_u(T[] a, T value)
+T[] _arrayExpSliceMinass_u(T value, T[] a)
 {
-    return _arrayExpSliceMinass_s(a, value);
+    return _arrayExpSliceMinass_s(value, a);
 }
 
-T[] _arrayExpSliceMinass_t(T[] a, T value)
+T[] _arrayExpSliceMinass_t(T value, T[] a)
 {
-    return _arrayExpSliceMinass_s(a, value);
+    return _arrayExpSliceMinass_s(value, a);
 }
 
-T[] _arrayExpSliceMinass_s(T[] a, T value)
+T[] _arrayExpSliceMinass_s(T value, T[] a)
 {
     //printf("_arrayExpSliceMinass_s(a.length = %d, value = %Lg)\n", a.length, cast(real)value);
     auto aptr = a.ptr;
@@ -1978,17 +1978,17 @@ unittest
  *      a[] -= b[]
  */
 
-T[] _arraySliceSliceMinass_u(T[] a, T[] b)
+T[] _arraySliceSliceMinass_u(T[] b, T[] a)
 {
-    return _arraySliceSliceMinass_s(a, b);
+    return _arraySliceSliceMinass_s(b, a);
 }
 
-T[] _arraySliceSliceMinass_t(T[] a, T[] b)
+T[] _arraySliceSliceMinass_t(T[] b, T[] a)
 {
-    return _arraySliceSliceMinass_s(a, b);
+    return _arraySliceSliceMinass_s(b, a);
 }
 
-T[] _arraySliceSliceMinass_s(T[] a, T[] b)
+T[] _arraySliceSliceMinass_s(T[] b, T[] a)
 {
     enforceTypedArraysConformable("vector operation", a, b);
 
@@ -2209,17 +2209,17 @@ unittest
  *      a[] = b[] * value
  */
 
-T[] _arraySliceExpMulSliceAssign_u(T[] a, T value, T[] b)
+T[] _arraySliceExpMulSliceAssign_u(T[] b, T value, T[] a)
 {
-    return _arraySliceExpMulSliceAssign_s(a, value, b);
+    return _arraySliceExpMulSliceAssign_s(b, value, a);
 }
 
-T[] _arraySliceExpMulSliceAssign_t(T[] a, T value, T[] b)
+T[] _arraySliceExpMulSliceAssign_t(T[] b, T value, T[] a)
 {
-    return _arraySliceExpMulSliceAssign_s(a, value, b);
+    return _arraySliceExpMulSliceAssign_s(b, value, a);
 }
 
-T[] _arraySliceExpMulSliceAssign_s(T[] a, T value, T[] b)
+T[] _arraySliceExpMulSliceAssign_s(T[] b, T value, T[] a)
 {
     enforceTypedArraysConformable("vector operation", a, b);
 
@@ -2447,17 +2447,17 @@ unittest
  *      a[] = b[] * c[]
  */
 
-T[] _arraySliceSliceMulSliceAssign_u(T[] a, T[] c, T[] b)
+T[] _arraySliceSliceMulSliceAssign_u(T[] b, T[] c, T[] a)
 {
-    return _arraySliceSliceMulSliceAssign_s(a, c, b);
+    return _arraySliceSliceMulSliceAssign_s(b, c, a);
 }
 
-T[] _arraySliceSliceMulSliceAssign_t(T[] a, T[] c, T[] b)
+T[] _arraySliceSliceMulSliceAssign_t(T[] b, T[] c, T[] a)
 {
-    return _arraySliceSliceMulSliceAssign_s(a, c, b);
+    return _arraySliceSliceMulSliceAssign_s(b, c, a);
 }
 
-T[] _arraySliceSliceMulSliceAssign_s(T[] a, T[] c, T[] b)
+T[] _arraySliceSliceMulSliceAssign_s(T[] b, T[] c, T[] a)
 {
     enforceTypedArraysConformable("vector operation", a, b);
     enforceTypedArraysConformable("vector operation", a, c);
@@ -2694,17 +2694,17 @@ unittest
  *      a[] *= value
  */
 
-T[] _arrayExpSliceMulass_u(T[] a, T value)
+T[] _arrayExpSliceMulass_u(T value, T[] a)
 {
-    return _arrayExpSliceMulass_s(a, value);
+    return _arrayExpSliceMulass_s(value, a);
 }
 
-T[] _arrayExpSliceMulass_t(T[] a, T value)
+T[] _arrayExpSliceMulass_t(T value, T[] a)
 {
-    return _arrayExpSliceMulass_s(a, value);
+    return _arrayExpSliceMulass_s(value, a);
 }
 
-T[] _arrayExpSliceMulass_s(T[] a, T value)
+T[] _arrayExpSliceMulass_s(T value, T[] a)
 {
     //printf("_arrayExpSliceMulass_s(a.length = %d, value = %Lg)\n", a.length, cast(real)value);
     auto aptr = a.ptr;
@@ -2915,17 +2915,17 @@ unittest
  *      a[] *= b[]
  */
 
-T[] _arraySliceSliceMulass_u(T[] a, T[] b)
+T[] _arraySliceSliceMulass_u(T[] b, T[] a)
 {
-    return _arraySliceSliceMulass_s(a, b);
+    return _arraySliceSliceMulass_s(b, a);
 }
 
-T[] _arraySliceSliceMulass_t(T[] a, T[] b)
+T[] _arraySliceSliceMulass_t(T[] b, T[] a)
 {
-    return _arraySliceSliceMulass_s(a, b);
+    return _arraySliceSliceMulass_s(b, a);
 }
 
-T[] _arraySliceSliceMulass_s(T[] a, T[] b)
+T[] _arraySliceSliceMulass_s(T[] b, T[] a)
 {
     enforceTypedArraysConformable("vector operation", a, b);
 

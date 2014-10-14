@@ -205,14 +205,13 @@ private template CodeGenSliceSliceOp(string opD, string opSSE, string op3DNow)
  *      a[] = b[] + c[]
  */
 
-T[] _arraySliceSliceAddSliceAssign_f(T[] a, T[] c, T[] b)
+T[] _arraySliceSliceAddSliceAssign_f(T[] b, T[] c, T[] a)
 {
     enforceTypedArraysConformable("vector operation", a, b);
     enforceTypedArraysConformable("vector operation", a, c);
 
     mixin(CodeGenSliceSliceOp!("+", "addps", "pfadd"));
 }
-
 
 unittest
 {
@@ -258,14 +257,13 @@ unittest
  *      a[] = b[] - c[]
  */
 
-T[] _arraySliceSliceMinSliceAssign_f(T[] a, T[] c, T[] b)
+T[] _arraySliceSliceMinSliceAssign_f(T[] b, T[] c, T[] a)
 {
     enforceTypedArraysConformable("vector operation", a, b);
     enforceTypedArraysConformable("vector operation", a, c);
 
     mixin(CodeGenSliceSliceOp!("-", "subps", "pfsub"));
 }
-
 
 unittest
 {
@@ -311,7 +309,7 @@ unittest
  *      a[] = b[] * c[]
  */
 
-T[] _arraySliceSliceMulSliceAssign_f(T[] a, T[] c, T[] b)
+T[] _arraySliceSliceMulSliceAssign_f(T[] b, T[] c, T[] a)
 {
     enforceTypedArraysConformable("vector operation", a, b);
     enforceTypedArraysConformable("vector operation", a, c);
@@ -505,7 +503,7 @@ private template CodeGenExpSliceOpAssign(string opD, string opSSE, string op3DNo
  *      a[] += value
  */
 
-T[] _arrayExpSliceAddass_f(T[] a, T value)
+T[] _arrayExpSliceAddass_f(T value, T[] a)
 {
     mixin(CodeGenExpSliceOpAssign!("+=", "addps", "pfadd"));
 }
@@ -555,7 +553,7 @@ unittest
  *      a[] -= value
  */
 
-T[] _arrayExpSliceMinass_f(T[] a, T value)
+T[] _arrayExpSliceMinass_f(T value, T[] a)
 {
     mixin(CodeGenExpSliceOpAssign!("-=", "subps", "pfsub"));
 }
@@ -605,7 +603,7 @@ unittest
  *      a[] *= value
  */
 
-T[] _arrayExpSliceMulass_f(T[] a, T value)
+T[] _arrayExpSliceMulass_f(T value, T[] a)
 {
     mixin(CodeGenExpSliceOpAssign!("*=", "mulps", "pfmul"));
 }
@@ -655,9 +653,9 @@ unittest
  *      a[] /= value
  */
 
-T[] _arrayExpSliceDivass_f(T[] a, T value)
+T[] _arrayExpSliceDivass_f(T value, T[] a)
 {
-    return _arrayExpSliceMulass_f(a, 1f / value);
+    return _arrayExpSliceMulass_f(1f / value, a);
 }
 
 unittest
@@ -847,7 +845,7 @@ private template CodeGenSliceExpOp(string opD, string opSSE, string op3DNow)
  *      a[] = b[] + value
  */
 
-T[] _arraySliceExpAddSliceAssign_f(T[] a, T value, T[] b)
+T[] _arraySliceExpAddSliceAssign_f(T[] b, T value, T[] a)
 {
     enforceTypedArraysConformable("vector operation", a, b);
 
@@ -898,7 +896,7 @@ unittest
  *      a[] = b[] - value
  */
 
-T[] _arraySliceExpMinSliceAssign_f(T[] a, T value, T[] b)
+T[] _arraySliceExpMinSliceAssign_f(T[] b, T value, T[] a)
 {
     enforceTypedArraysConformable("vector operation", a, b);
 
@@ -949,7 +947,7 @@ unittest
  *      a[] = b[] * value
  */
 
-T[] _arraySliceExpMulSliceAssign_f(T[] a, T value, T[] b)
+T[] _arraySliceExpMulSliceAssign_f(T[] b, T value, T[] a)
 {
     enforceTypedArraysConformable("vector operation", a, b);
 
@@ -1000,9 +998,9 @@ unittest
  *      a[] = b[] / value
  */
 
-T[] _arraySliceExpDivSliceAssign_f(T[] a, T value, T[] b)
+T[] _arraySliceExpDivSliceAssign_f(T[] b, T value, T[] a)
 {
-    return _arraySliceExpMulSliceAssign_f(a, 1f/value, b);
+    return _arraySliceExpMulSliceAssign_f(b, 1f / value, a);
 }
 
 unittest
@@ -1190,7 +1188,7 @@ private template CodeGenSliceOpAssign(string opD, string opSSE, string op3DNow)
  *      a[] += b[]
  */
 
-T[] _arraySliceSliceAddass_f(T[] a, T[] b)
+T[] _arraySliceSliceAddass_f(T[] b, T[] a)
 {
     enforceTypedArraysConformable("vector operation", a, b);
 
@@ -1242,7 +1240,7 @@ unittest
  *      a[] -= b[]
  */
 
-T[] _arraySliceSliceMinass_f(T[] a, T[] b)
+T[] _arraySliceSliceMinass_f(T[] b, T[] a)
 {
     enforceTypedArraysConformable("vector operation", a, b);
 
@@ -1294,7 +1292,7 @@ unittest
  *      a[] *= b[]
  */
 
-T[] _arraySliceSliceMulass_f(T[] a, T[] b)
+T[] _arraySliceSliceMulass_f(T[] b, T[] a)
 {
     enforceTypedArraysConformable("vector operation", a, b);
 
@@ -1347,7 +1345,7 @@ unittest
  *      a[] = value - b[]
  */
 
-T[] _arrayExpSliceMinSliceAssign_f(T[] a, T[] b, T value)
+T[] _arrayExpSliceMinSliceAssign_f(T value, T[] b, T[] a)
 {
     enforceTypedArraysConformable("vector operation", a, b);
 
@@ -1491,9 +1489,9 @@ unittest
  *      a[] -= b[] * value
  */
 
-T[] _arraySliceExpMulSliceMinass_f(T[] a, T value, T[] b)
+T[] _arraySliceExpMulSliceMinass_f(T[] b, T value, T[] a)
 {
-    return _arraySliceExpMulSliceAddass_f(a, -value, b);
+    return _arraySliceExpMulSliceAddass_f(b, -value, a);
 }
 
 /***********************
@@ -1501,7 +1499,7 @@ T[] _arraySliceExpMulSliceMinass_f(T[] a, T value, T[] b)
  *      a[] += b[] * value
  */
 
-T[] _arraySliceExpMulSliceAddass_f(T[] a, T value, T[] b)
+T[] _arraySliceExpMulSliceAddass_f(T[] b, T value, T[] a)
 {
     enforceTypedArraysConformable("vector operation", a, b);
 

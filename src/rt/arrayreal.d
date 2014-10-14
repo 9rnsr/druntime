@@ -53,7 +53,7 @@ extern (C) @trusted nothrow:
  *      a[] = b[] + c[]
  */
 
-T[] _arraySliceSliceAddSliceAssign_r(T[] a, T[] c, T[] b)
+T[] _arraySliceSliceAddSliceAssign_r(T[] b, T[] c, T[] a)
 {
     enforceTypedArraysConformable("vector operation", a, b);
     enforceTypedArraysConformable("vector operation", a, c);
@@ -107,7 +107,7 @@ unittest
  *      a[] = b[] - c[]
  */
 
-T[] _arraySliceSliceMinSliceAssign_r(T[] a, T[] c, T[] b)
+T[] _arraySliceSliceMinSliceAssign_r(T[] b, T[] c, T[] a)
 {
     enforceTypedArraysConformable("vector operation", a, b);
     enforceTypedArraysConformable("vector operation", a, c);
@@ -162,9 +162,9 @@ unittest
  *      a[] -= b[] * value
  */
 
-T[] _arraySliceExpMulSliceMinass_r(T[] a, T value, T[] b)
+T[] _arraySliceExpMulSliceMinass_r(T[] b, T value, T[] a)
 {
-    return _arraySliceExpMulSliceAddass_r(a, -value, b);
+    return _arraySliceExpMulSliceAddass_r(b, -value, a);
 }
 
 /***********************
@@ -172,7 +172,7 @@ T[] _arraySliceExpMulSliceMinass_r(T[] a, T value, T[] b)
  *      a[] += b[] * value
  */
 
-T[] _arraySliceExpMulSliceAddass_r(T[] a, T value, T[] b)
+T[] _arraySliceExpMulSliceAddass_r(T[] b, T value, T[] a)
 {
     enforceTypedArraysConformable("vector operation", a, b);
 

@@ -57,7 +57,7 @@ extern (C) @trusted nothrow:
  *      a[] = b[] + c[]
  */
 
-T[] _arraySliceSliceAddSliceAssign_d(T[] a, T[] c, T[] b)
+T[] _arraySliceSliceAddSliceAssign_d(T[] b, T[] c, T[] a)
 {
     enforceTypedArraysConformable("vector operation", a, b);
     enforceTypedArraysConformable("vector operation", a, c);
@@ -210,7 +210,7 @@ unittest
  *      a[] = b[] - c[]
  */
 
-T[] _arraySliceSliceMinSliceAssign_d(T[] a, T[] c, T[] b)
+T[] _arraySliceSliceMinSliceAssign_d(T[] b, T[] c, T[] a)
 {
     enforceTypedArraysConformable("vector operation", a, b);
     enforceTypedArraysConformable("vector operation", a, c);
@@ -364,7 +364,7 @@ unittest
  *      a[] = b[] + value
  */
 
-T[] _arraySliceExpAddSliceAssign_d(T[] a, T value, T[] b)
+T[] _arraySliceExpAddSliceAssign_d(T[] b, T value, T[] a)
 {
     enforceTypedArraysConformable("vector operation", a, b);
 
@@ -505,7 +505,7 @@ unittest
  *      a[] += value
  */
 
-T[] _arrayExpSliceAddass_d(T[] a, T value)
+T[] _arrayExpSliceAddass_d(T value, T[] a)
 {
     auto aptr = a.ptr;
     auto aend = aptr + a.length;
@@ -639,7 +639,7 @@ unittest
  *      a[] += b[]
  */
 
-T[] _arraySliceSliceAddass_d(T[] a, T[] b)
+T[] _arraySliceSliceAddass_d(T[] b, T[] a)
 {
     enforceTypedArraysConformable("vector operation", a, b);
 
@@ -815,7 +815,7 @@ unittest
  *      a[] = b[] - value
  */
 
-T[] _arraySliceExpMinSliceAssign_d(T[] a, T value, T[] b)
+T[] _arraySliceExpMinSliceAssign_d(T[] b, T value, T[] a)
 {
     enforceTypedArraysConformable("vector operation", a, b);
 
@@ -955,7 +955,7 @@ unittest
  *      a[] = value - b[]
  */
 
-T[] _arrayExpSliceMinSliceAssign_d(T[] a, T[] b, T value)
+T[] _arrayExpSliceMinSliceAssign_d(T value, T[] b, T[] a)
 {
     enforceTypedArraysConformable("vector operation", a, b);
 
@@ -1103,7 +1103,7 @@ unittest
  *      a[] -= value
  */
 
-T[] _arrayExpSliceMinass_d(T[] a, T value)
+T[] _arrayExpSliceMinass_d(T value, T[] a)
 {
     auto aptr = a.ptr;
     auto aend = aptr + a.length;
@@ -1237,7 +1237,7 @@ unittest
  *      a[] -= b[]
  */
 
-T[] _arraySliceSliceMinass_d(T[] a, T[] b)
+T[] _arraySliceSliceMinass_d(T[] b, T[] a)
 {
     enforceTypedArraysConformable("vector operation", a, b);
 
@@ -1382,7 +1382,7 @@ unittest
  *      a[] = b[] * value
  */
 
-T[] _arraySliceExpMulSliceAssign_d(T[] a, T value, T[] b)
+T[] _arraySliceExpMulSliceAssign_d(T[] b, T value, T[] a)
 {
     enforceTypedArraysConformable("vector operation", a, b);
 
@@ -1522,7 +1522,7 @@ unittest
  *      a[] = b[] * c[]
  */
 
-T[] _arraySliceSliceMulSliceAssign_d(T[] a, T[] c, T[] b)
+T[] _arraySliceSliceMulSliceAssign_d(T[] b, T[] c, T[] a)
 {
     enforceTypedArraysConformable("vector operation", a, b);
     enforceTypedArraysConformable("vector operation", a, c);
@@ -1674,7 +1674,7 @@ unittest
  *      a[] *= value
  */
 
-T[] _arrayExpSliceMulass_d(T[] a, T value)
+T[] _arrayExpSliceMulass_d(T value, T[] a)
 {
     auto aptr = a.ptr;
     auto aend = aptr + a.length;
@@ -1808,7 +1808,7 @@ unittest
  *      a[] *= b[]
  */
 
-T[] _arraySliceSliceMulass_d(T[] a, T[] b)
+T[] _arraySliceSliceMulass_d(T[] b, T[] a)
 {
     enforceTypedArraysConformable("vector operation", a, b);
 
@@ -1953,7 +1953,7 @@ unittest
  *      a[] = b[] / value
  */
 
-T[] _arraySliceExpDivSliceAssign_d(T[] a, T value, T[] b)
+T[] _arraySliceExpDivSliceAssign_d(T[] b, T value, T[] a)
 {
     enforceTypedArraysConformable("vector operation", a, b);
 
@@ -2100,7 +2100,7 @@ unittest
  *      a[] /= value
  */
 
-T[] _arrayExpSliceDivass_d(T[] a, T value)
+T[] _arrayExpSliceDivass_d(T value, T[] a)
 {
     auto aptr = a.ptr;
     auto aend = aptr + a.length;
@@ -2239,9 +2239,9 @@ unittest
  *      a[] -= b[] * value
  */
 
-T[] _arraySliceExpMulSliceMinass_d(T[] a, T value, T[] b)
+T[] _arraySliceExpMulSliceMinass_d(T[] b, T value, T[] a)
 {
-    return _arraySliceExpMulSliceAddass_d(a, -value, b);
+    return _arraySliceExpMulSliceAddass_d(b, -value, a);
 }
 
 /***********************
@@ -2249,7 +2249,7 @@ T[] _arraySliceExpMulSliceMinass_d(T[] a, T value, T[] b)
  *      a[] += b[] * value
  */
 
-T[] _arraySliceExpMulSliceAddass_d(T[] a, T value, T[] b)
+T[] _arraySliceExpMulSliceAddass_d(T[] b, T value, T[] a)
 {
     enforceTypedArraysConformable("vector operation", a, b);
 
