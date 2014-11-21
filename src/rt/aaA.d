@@ -49,7 +49,7 @@ static immutable size_t[] prime_list = [
  * Although DMD will return types of Array in registers,
  * gcc will not, so we instead use a 'long'.
  */
-alias void[] ArrayRet_t;
+alias ArrayRet_t = void[];
 
 struct Array
 {
@@ -67,14 +67,16 @@ struct Entry
 
 struct Impl
 {
-    Entry*[] buckets;
-    size_t nodes;       // total number of entries
-    size_t firstUsedBucket; // starting index for first used bucket.
-    TypeInfo _keyti;
-    Entry*[4] binit;    // initial value of buckets[]
+    Entry*[]    buckets;
+    size_t      nodes;      // total number of entries
+    size_t      firstUsedBucket; // starting index for first used bucket.
+    TypeInfo    _keyti;
+    Entry*[4]   binit;      // initial value of buckets[]
 
     @property const(TypeInfo) keyti() const @safe pure nothrow @nogc
-    { return _keyti; }
+    {
+        return _keyti;
+    }
 
     // helper function to determine first used bucket, and update implementation's cache for it
     // NOTE: will not work with immutable AA in ROM, but that doesn't exist yet.
@@ -82,13 +84,13 @@ struct Impl
     in
     {
         assert(firstUsedBucket < buckets.length);
-        foreach(i; 0 .. firstUsedBucket)
+        foreach (i; 0 .. firstUsedBucket)
             assert(buckets[i] is null);
     }
     body
     {
         size_t i;
-        for(i = firstUsedBucket; i < buckets.length; ++i)
+        for (i = firstUsedBucket; i < buckets.length; ++i)
             if(buckets[i] !is null)
                 break;
         return firstUsedBucket = i;
@@ -110,11 +112,13 @@ struct AA
  */
 size_t aligntsize(in size_t tsize) @safe pure nothrow @nogc
 {
-    version (D_LP64) {
+    version (D_LP64)
+    {
         // align to 16 bytes on 64-bit
         return (tsize + 15) & ~(15);
     }
-    else {
+    else
+    {
         return (tsize + size_t.sizeof - 1) & ~(size_t.sizeof - 1);
     }
 }
@@ -221,7 +225,7 @@ body
 
         // update cache if necessary
         if (i < aa.impl.firstUsedBucket)
-                aa.impl.firstUsedBucket = i;
+            aa.impl.firstUsedBucket = i;
         if (nodes > aa.impl.buckets.length * 4)
         {
             //printf("rehash\n");
@@ -238,7 +242,7 @@ pure nothrow unittest
 {
     int[int] aa;
     // make all values go into the last bucket (int hash is simply the int)
-    foreach(i; 0..16)
+    foreach (i; 0..16)
     {
         aa[3 + i * 4] = 1;
         assert(aa.keys.length == i+1);
@@ -323,9 +327,11 @@ bool _aaDelX(AA aa, in TypeInfo keyti, in void* pkey)
                 if (keyti.equals(pkey, e + 1))
                 {
                     *pe = e.next;
-                    if(!(--aa.impl.nodes))
+                    if (!(--aa.impl.nodes))
+                    {
                         // reset cache, we know there are no nodes in the aa.
                         aa.impl.firstUsedBucket = aa.impl.buckets.length;
+                    }
                     GC.free(e);
                     return true;
                 }
