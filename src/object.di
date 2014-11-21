@@ -14,20 +14,20 @@ module object;
 
 private
 {
-    extern(C) void rt_finalize(void *ptr, bool det=true);
+    extern(C) void rt_finalize(void *ptr, bool det = true);
 }
 
-alias typeof(int.sizeof)                    size_t;
-alias typeof(cast(void*)0 - cast(void*)0)   ptrdiff_t;
+alias size_t    = typeof(int.sizeof);
+alias ptrdiff_t = typeof(cast(void*)0 - cast(void*)0);
 
-alias ptrdiff_t sizediff_t; //For backwards compatibility only.
+alias sizediff_t = ptrdiff_t;   //For backwards compatibility only.
 
-alias size_t hash_t; //For backwards compatibility only.
-alias bool equals_t; //For backwards compatibility only.
+alias hash_t   = size_t;        //For backwards compatibility only.
+alias equals_t = bool;          //For backwards compatibility only.
 
-alias immutable(char)[]  string;
-alias immutable(wchar)[] wstring;
-alias immutable(dchar)[] dstring;
+alias  string = immutable( char)[];
+alias wstring = immutable(wchar)[];
+alias dstring = immutable(dchar)[];
 
 class Object
 {
@@ -52,9 +52,9 @@ void setSameMutex(shared Object ownee, shared Object owner);
 
 struct Interface
 {
-    TypeInfo_Class   classinfo;
-    void*[]     vtbl;
-    size_t      offset;   // offset to Interface 'this' from Object 'this'
+    TypeInfo_Class  classinfo;
+    void*[]         vtbl;
+    size_t          offset;   // offset to Interface 'this' from Object 'this'
 }
 
 struct OffsetTypeInfo
@@ -66,24 +66,24 @@ struct OffsetTypeInfo
 class TypeInfo
 {
     override string toString() const pure @safe nothrow;
-    override size_t toHash() @trusted const;
+    override size_t toHash() const @trusted;
     override int opCmp(Object o);
     override bool opEquals(Object o);
-    size_t   getHash(in void* p) @trusted nothrow const;
-    bool     equals(in void* p1, in void* p2) const;
-    int      compare(in void* p1, in void* p2) const;
-    @property size_t   tsize() nothrow pure const @safe @nogc;
-    void     swap(void* p1, void* p2) const;
-    @property inout(TypeInfo) next() nothrow pure inout @nogc;
-    const(void)[]   init() nothrow pure const @safe @nogc; // TODO: make this a property, but may need to be renamed to diambiguate with T.init...
-    @property uint     flags() nothrow pure const @safe @nogc;
+    size_t getHash(in void* p) const @trusted nothrow;
+    bool equals(in void* p1, in void* p2) const;
+    int compare(in void* p1, in void* p2) const;
+    @property size_t tsize() const nothrow pure @safe @nogc;
+    void swap(void* p1, void* p2) const;
+    @property inout(TypeInfo) next() inout nothrow pure @nogc;
+    const(void)[] init() const nothrow pure @safe @nogc; // TODO: make this a property, but may need to be renamed to diambiguate with T.init...
+    @property uint flags() const nothrow pure @safe @nogc;
     // 1:    // has possible pointers into GC memory
     const(OffsetTypeInfo)[] offTi() const;
     void destroy(void* p) const;
     void postblit(void* p) const;
-    @property size_t talign() nothrow pure const @safe @nogc;
+    @property size_t talign() const nothrow pure @safe @nogc;
     version (X86_64) int argTypes(out TypeInfo arg1, out TypeInfo arg2) @safe nothrow;
-    @property immutable(void)* rtInfo() nothrow pure const @safe @nogc;
+    @property immutable(void)* rtInfo() const nothrow pure @safe @nogc;
 }
 
 class TypeInfo_Typedef : TypeInfo
@@ -95,7 +95,6 @@ class TypeInfo_Typedef : TypeInfo
 
 class TypeInfo_Enum : TypeInfo_Typedef
 {
-
 }
 
 class TypeInfo_Pointer : TypeInfo
@@ -107,14 +106,14 @@ class TypeInfo_Array : TypeInfo
 {
     override string toString() const;
     override bool opEquals(Object o);
-    override size_t getHash(in void* p) @trusted const;
+    override size_t getHash(in void* p) const @trusted;
     override bool equals(in void* p1, in void* p2) const;
     override int compare(in void* p1, in void* p2) const;
     override @property size_t tsize() nothrow pure const;
     override void swap(void* p1, void* p2) const;
-    override @property inout(TypeInfo) next() nothrow pure inout;
-    override @property uint flags() nothrow pure const;
-    override @property size_t talign() nothrow pure const;
+    override @property inout(TypeInfo) next() inout nothrow pure;
+    override @property uint flags() const nothrow pure;
+    override @property size_t talign() const nothrow pure;
     version (X86_64) override int argTypes(out TypeInfo arg1, out TypeInfo arg2);
 
     TypeInfo value;
@@ -123,7 +122,7 @@ class TypeInfo_Array : TypeInfo
 class TypeInfo_StaticArray : TypeInfo
 {
     TypeInfo value;
-    size_t   len;
+    size_t len;
 }
 
 class TypeInfo_AssociativeArray : TypeInfo
@@ -151,39 +150,40 @@ class TypeInfo_Delegate : TypeInfo
 
 class TypeInfo_Class : TypeInfo
 {
-    @property auto info() @safe nothrow pure const { return this; }
-    @property auto typeinfo() @safe nothrow pure const { return this; }
+    @property auto info() const @safe nothrow pure { return this; }
+    @property auto typeinfo() const @safe nothrow pure { return this; }
 
-    byte[]      init;   // class static initializer
-    string      name;   // class name
-    void*[]     vtbl;   // virtual function pointer table
-    Interface[] interfaces;
-    TypeInfo_Class   base;
-    void*       destructor;
-    void function(Object) classInvariant;
     enum ClassFlags : uint
     {
-        isCOMclass = 0x1,
-        noPointers = 0x2,
-        hasOffTi = 0x4,
-        hasCtor = 0x8,
-        hasGetMembers = 0x10,
-        hasTypeInfo = 0x20,
-        isAbstract = 0x40,
-        isCPPclass = 0x80,
-        hasDtor = 0x100,
+        isCOMclass      = 0x1,
+        noPointers      = 0x2,
+        hasOffTi        = 0x4,
+        hasCtor         = 0x8,
+        hasGetMembers   = 0x10,
+        hasTypeInfo     = 0x20,
+        isAbstract      = 0x40,
+        isCPPclass      = 0x80,
+        hasDtor         = 0x100,
     }
-    ClassFlags m_flags;
-    void*       deallocator;
-    OffsetTypeInfo[] m_offTi;
-    void*       defaultConstructor;
-    immutable(void)*    m_rtInfo;     // data for precise GC
+
+    byte[]                  init;   // class static initializer
+    string                  name;   // class name
+    void*[]                 vtbl;   // virtual function pointer table
+    Interface[]             interfaces;
+    TypeInfo_Class          base;
+    void*                   destructor;
+    void function(Object)   classInvariant;
+    ClassFlags              m_flags;
+    void*                   deallocator;
+    OffsetTypeInfo[]        m_offTi;
+    void*                   defaultConstructor;
+    immutable(void)*        m_rtInfo;     // data for precise GC
 
     static const(TypeInfo_Class) find(in char[] classname);
     Object create() const;
 }
 
-alias TypeInfo_Class ClassInfo;
+alias ClassInfo = TypeInfo_Class;
 
 class TypeInfo_Interface : TypeInfo
 {
@@ -197,10 +197,10 @@ class TypeInfo_Struct : TypeInfo
 
   @safe pure nothrow
   {
-    uint function(in void*)               xtoHash;
-    bool function(in void*, in void*) xopEquals;
-    int function(in void*, in void*)      xopCmp;
-    string function(in void*)             xtoString;
+    uint   function(in void*)           xtoHash;
+    bool   function(in void*, in void*) xopEquals;
+    int    function(in void*, in void*) xopCmp;
+    string function(in void*)           xtoString;
 
     enum StructFlags : uint
     {
@@ -208,8 +208,8 @@ class TypeInfo_Struct : TypeInfo
     }
     StructFlags m_flags;
   }
-    void function(void*)                    xdtor;
-    void function(void*)                    xpostblit;
+    void function(void*)                xdtor;
+    void function(void*)                xpostblit;
 
     uint m_align;
 
@@ -223,7 +223,7 @@ class TypeInfo_Struct : TypeInfo
 
 class TypeInfo_Tuple : TypeInfo
 {
-    TypeInfo[]  elements;
+    TypeInfo[] elements;
 }
 
 class TypeInfo_Const : TypeInfo
@@ -233,7 +233,6 @@ class TypeInfo_Const : TypeInfo
 
 class TypeInfo_Invariant : TypeInfo_Const
 {
-
 }
 
 class TypeInfo_Shared : TypeInfo_Const
@@ -312,8 +311,8 @@ class Throwable : Object
 {
     interface TraceInfo
     {
-        int opApply(scope int delegate(ref const(char[]))) const;
-        int opApply(scope int delegate(ref size_t, ref const(char[]))) const;
+        int opApply(scope int delegate(ref const char[])) const;
+        int opApply(scope int delegate(ref size_t, ref const char[])) const;
         string toString() const;
     }
 
@@ -357,10 +356,11 @@ class Error : Throwable
         super(msg, file, line, next);
         bypassedException = null;
     }
-    Throwable   bypassedException;
+
+    Throwable bypassedException;
 }
 
-extern (C)
+extern(C)
 {
     // from druntime/src/rt/aaA.d
 
@@ -395,7 +395,7 @@ extern (C)
 
 auto aaLiteral(Key, Value, T...)(auto ref T args) if (T.length % 2 == 0)
 {
-    static if(!T.length) 
+    static if (!T.length)
     {
         return cast(void*)null;
     }
@@ -415,7 +415,7 @@ auto aaLiteral(Key, Value, T...)(auto ref T args) if (T.length % 2 == 0)
 
         void[] key_slice;
         void[] value_slice;
-        void *ret;
+        void* ret;
         () @trusted {
             key_slice = *cast(void[]*)&keys;
             value_slice = *cast(void[]*)&values;
@@ -425,29 +425,29 @@ auto aaLiteral(Key, Value, T...)(auto ref T args) if (T.length % 2 == 0)
     }
 }
 
-alias AssociativeArray(Key, Value) = Value[Key];
+alias AssociativeArray(K, V) = V[K];
 
-T rehash(T : Value[Key], Value, Key)(T aa)
+T rehash(T : V[K], K, V)(T aa)
 {
-    _aaRehash(cast(void**)&aa, typeid(Value[Key]));
+    _aaRehash(cast(void**)&aa, typeid(V[K]));
     return aa;
 }
 
-T rehash(T : Value[Key], Value, Key)(T* aa)
+T rehash(T : V[K], K, V)(T* aa)
 {
-    _aaRehash(cast(void**)aa, typeid(Value[Key]));
+    _aaRehash(cast(void**)aa, typeid(V[K]));
     return *aa;
 }
 
-T rehash(T : shared Value[Key], Value, Key)(T aa)
+T rehash(T : shared V[K], K, V)(T aa)
 {
-    _aaRehash(cast(void**)&aa, typeid(Value[Key]));
+    _aaRehash(cast(void**)&aa, typeid(V[K]));
     return aa;
 }
 
-T rehash(T : shared Value[Key], Value, Key)(T* aa)
+T rehash(T : shared V[K], K, V)(T* aa)
 {
-    _aaRehash(cast(void**)aa, typeid(Value[Key]));
+    _aaRehash(cast(void**)aa, typeid(V[K]));
     return *aa;
 }
 
@@ -490,7 +490,7 @@ V[K] dup(T : V[K], K, V)(T* aa)
     return (*aa).dup;
 }
 
-auto byKey(T : Value[Key], Value, Key)(T aa) pure nothrow @nogc
+auto byKey(T : V[K], K, V)(T aa) pure nothrow @nogc
 {
     static struct Result
     {
@@ -498,7 +498,7 @@ auto byKey(T : Value[Key], Value, Key)(T aa) pure nothrow @nogc
 
     pure nothrow @nogc:
         @property bool empty() { return _aaRangeEmpty(r); }
-        @property ref Key front() { return *cast(Key*)_aaRangeFrontKey(r); }
+        @property ref K front() { return *cast(K*)_aaRangeFrontKey(r); }
         void popFront() { _aaRangePopFront(r); }
         @property Result save() { return this; }
     }
@@ -506,12 +506,12 @@ auto byKey(T : Value[Key], Value, Key)(T aa) pure nothrow @nogc
     return Result(_aaRange(cast(void*)aa));
 }
 
-auto byKey(T : Value[Key], Value, Key)(T *aa) pure nothrow @nogc
+auto byKey(T : V[K], K, V)(T *aa) pure nothrow @nogc
 {
     return (*aa).byKey();
 }
 
-auto byValue(T : Value[Key], Value, Key)(T aa) pure nothrow @nogc
+auto byValue(T : V[K], K, V)(T aa) pure nothrow @nogc
 {
     static struct Result
     {
@@ -519,7 +519,7 @@ auto byValue(T : Value[Key], Value, Key)(T aa) pure nothrow @nogc
 
     pure nothrow @nogc:
         @property bool empty() { return _aaRangeEmpty(r); }
-        @property ref Value front() { return *cast(Value*)_aaRangeFrontValue(r); }
+        @property ref V front() { return *cast(V*)_aaRangeFrontValue(r); }
         void popFront() { _aaRangePopFront(r); }
         @property Result save() { return this; }
     }
@@ -527,29 +527,29 @@ auto byValue(T : Value[Key], Value, Key)(T aa) pure nothrow @nogc
     return Result(_aaRange(cast(void*)aa));
 }
 
-auto byValue(T : Value[Key], Value, Key)(T *aa) pure nothrow @nogc
+auto byValue(T : V[K], K, V)(T *aa) pure nothrow @nogc
 {
     return (*aa).byValue();
 }
 
-Key[] keys(T : Value[Key], Value, Key)(T aa) @property
+K[] keys(T : V[K], K, V)(T aa) @property
 {
-    auto a = cast(void[])_aaKeys(cast(inout(void)*)aa, Key.sizeof);
-    return *cast(Key[]*)&a;
+    auto a = cast(void[])_aaKeys(cast(inout(void)*)aa, K.sizeof);
+    return *cast(K[]*)&a;
 }
 
-Key[] keys(T : Value[Key], Value, Key)(T *aa) @property
+K[] keys(T : V[K], K, V)(T *aa) @property
 {
     return (*aa).keys;
 }
 
-Value[] values(T : Value[Key], Value, Key)(T aa) @property
+V[] values(T : V[K], K, V)(T aa) @property
 {
-    auto a = cast(void[])_aaValues(cast(inout(void)*)aa, Key.sizeof, Value.sizeof);
-    return *cast(Value[]*)&a;
+    auto a = cast(void[])_aaValues(cast(inout(void)*)aa, K.sizeof, V.sizeof);
+    return *cast(V[]*)&a;
 }
 
-Value[] values(T : Value[Key], Value, Key)(T *aa) @property
+V[] values(T : V[K], K, V)(T *aa) @property
 {
     return (*aa).values;
 }
@@ -582,9 +582,9 @@ void destroy(T)(T obj) if (is(T == interface))
 void destroy(T)(ref T obj) if (is(T == struct))
 {
     typeid(T).destroy(&obj);
-    auto buf = (cast(ubyte*) &obj)[0 .. T.sizeof];
+    auto buf = (cast(ubyte*)&obj)[0 .. T.sizeof];
     auto init = cast(ubyte[])typeid(T).init();
-    if(init.ptr is null) // null ptr means initialize to 0s
+    if (init.ptr is null) // null ptr means initialize to 0s
         buf[] = 0;
     else
         buf[] = init[];
@@ -601,30 +601,24 @@ if (!is(T == struct) && !is(T == interface) && !is(T == class) && !_isStaticArra
     obj = T.init;
 }
 
-template _isStaticArray(T : U[N], U, size_t N)
-{
-    enum bool _isStaticArray = true;
-}
-
-template _isStaticArray(T)
-{
-    enum bool _isStaticArray = false;
-}
+enum bool _isStaticArray(T : U[N], U, size_t N) = true;
+enum bool _isStaticArray(T) = false;
 
 private
 {
-    extern (C) void _d_arrayshrinkfit(TypeInfo ti, void[] arr) nothrow;
-    extern (C) size_t _d_arraysetcapacity(TypeInfo ti, size_t newcapacity, void *arrptr) pure nothrow;
+    extern(C) void _d_arrayshrinkfit(TypeInfo ti, void[] arr) nothrow;
+    extern(C) size_t _d_arraysetcapacity(TypeInfo ti, size_t newcapacity, void* arrptr) pure nothrow;
+    extern(C) void[] _d_newarrayU(const TypeInfo ti, size_t length) pure nothrow;
 }
 
 @property size_t capacity(T)(T[] arr) pure nothrow
 {
-    return _d_arraysetcapacity(typeid(T[]), 0, cast(void *)&arr);
+    return _d_arraysetcapacity(typeid(T[]), 0, cast(void*)&arr);
 }
 
 size_t reserve(T)(ref T[] arr, size_t newcapacity) pure nothrow @trusted
 {
-    return _d_arraysetcapacity(typeid(T[]), newcapacity, cast(void *)&arr);
+    return _d_arraysetcapacity(typeid(T[]), newcapacity, cast(void*)&arr);
 }
 
 auto ref inout(T[]) assumeSafeAppend(T)(auto ref inout(T[]) arr) nothrow
@@ -637,8 +631,9 @@ bool _ArrayEq(T1, T2)(T1[] a1, T2[] a2)
 {
     if (a1.length != a2.length)
         return false;
-    foreach(i, a; a1)
-    {   if (a != a2[i])
+    foreach (i, a; a1)
+    {
+        if (a != a2[i])
             return false;
     }
     return true;
@@ -713,7 +708,8 @@ template RTInfo(T)
 /// ditto
 @property T[] dup(T:void)(const(T)[] a) @trusted
 {
-    if (__ctfe) assert(0, "Cannot dup a void[] array at compile time.");
+    if (__ctfe)
+        assert(0, "Cannot dup a void[] array at compile time.");
     return cast(T[])_rawDup(a);
 }
 
@@ -731,7 +727,7 @@ template RTInfo(T)
 }
 
 /// ditto
-@property immutable(T)[] idup(T:void)(const(T)[] a)
+@property immutable(T)[] idup(T : void)(const(T)[] a)
 {
     return .dup(a);
 }
@@ -756,8 +752,6 @@ private U[] _dup(T, U)(T[] a) // pure nothrow depends on postblit
     _doPostblit(res);
     return res;
 }
-
-private extern (C) void[] _d_newarrayU(const TypeInfo ti, size_t length) pure nothrow;
 
 private inout(T)[] _rawDup(T)(inout(T)[] a)
 {
