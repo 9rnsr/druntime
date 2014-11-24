@@ -428,9 +428,9 @@ alias dg2_t = extern(D) int delegate(void*, void*);
 extern(C) int _aApplycd2(in char[] a, dg2_t dg)
 {
     debug(apply) printf("_aApplycd2(), len = %d\n", a.length);
+    /* bug, size_t n is necessary */
 
     immutable len = a.length;
-
     for (size_t i = 0; i < len; )
     {
         dchar d = a[i];
@@ -474,10 +474,10 @@ unittest
         //printf("i = %d, k = %d, d = %x\n", i, k, d);
         switch (i)
         {
-            case 0:     assert(d == 'a'          && k == 0);    break;
-            case 1:     assert(d == '\u1234'     && k == 1);    break;
-            case 2:     assert(d == '\U000A0456' && k == 4);    break;
-            case 3:     assert(d == 'b'          && k == 8);    break;
+            case 0:     assert(k == 0 && d == 'a'         );    break;
+            case 1:     assert(k == 1 && d == '\u1234'    );    break;
+            case 2:     assert(k == 4 && d == '\U000A0456');    break;
+            case 3:     assert(k == 8 && d == 'b'         );    break;
             default:    assert(0);
         }
         i++;
@@ -488,29 +488,21 @@ unittest
 /*****************************/
 
 extern(C) int _aApplywd2(in wchar[] a, dg2_t dg)
-{   int result;
-    size_t i;
-    size_t n;
-    size_t len = a.length;
+{
+    debug(apply) printf("_aApplywd2(), len = %d\n", a.length);
 
-    debug(apply) printf("_aApplywd2(), len = %d\n", len);
-    for (i = 0; i < len; i += n)
-    {   dchar d;
-
-        d = a[i];
+    immutable len = a.length;
+    for (size_t i = 0; i < len; )
+    {
+        dchar d = a[i];
         if (d & ~0x7F)
-        {
-            n = i;
-            d = decode(a, n);
-            n -= i;
-        }
+            d = decode(a, i);
         else
-            n = 1;
-        result = dg(&i, cast(void*)&d);
-        if (result)
-            break;
+            i++;
+        if (auto r = dg(&i, cast(void*)&d))
+            return r;
     }
-    return result;
+    return 0;
 }
 
 unittest
@@ -525,11 +517,11 @@ unittest
         assert(k == i);
         switch (i)
         {
-            case 0:     assert(d == 'h'); break;
-            case 1:     assert(d == 'e'); break;
-            case 2:     assert(d == 'l'); break;
-            case 3:     assert(d == 'l'); break;
-            case 4:     assert(d == 'o'); break;
+            case 0:     assert(d == 'h');   break;
+            case 1:     assert(d == 'e');   break;
+            case 2:     assert(d == 'l');   break;
+            case 3:     assert(d == 'l');   break;
+            case 4:     assert(d == 'o');   break;
             default:    assert(0);
         }
         i++;
@@ -543,10 +535,10 @@ unittest
         //printf("i = %d, k = %d, d = %x\n", i, k, d);
         switch (i)
         {
-            case 0:     assert(k == 0); assert(d == 'a'); break;
-            case 1:     assert(k == 1); assert(d == '\u1234'); break;
-            case 2:     assert(k == 2); assert(d == '\U000A0456'); break;
-            case 3:     assert(k == 4); assert(d == 'b'); break;
+            case 0:     assert(k == 0 && d == 'a');             break;
+            case 1:     assert(k == 1 && d == '\u1234');        break;
+            case 2:     assert(k == 2 && d == '\U000A0456');    break;
+            case 3:     assert(k == 4 && d == 'b');             break;
             default:    assert(0);
         }
         i++;
@@ -557,39 +549,32 @@ unittest
 /*****************************/
 
 extern(C) int _aApplycw2(in char[] a, dg2_t dg)
-{   int result;
-    size_t i;
-    size_t n;
-    size_t len = a.length;
+{
+    debug(apply) printf("_aApplycw2(), len = %d\n", a.length);
 
-    debug(apply) printf("_aApplycw2(), len = %d\n", len);
-    for (i = 0; i < len; i += n)
-    {   dchar d;
-        wchar w;
-
-        w = a[i];
+    immutable len = a.length;
+    for (size_t i = 0; i < len; )
+    {
+        wchar w = a[i];
         if (w & 0x80)
-        {   n = i;
-            d = decode(a, n);
-            n -= i;
+        {
+            dchar d = decode(a, i);
             if (d <= 0xFFFF)
-                w = cast(wchar) d;
+                w = cast(wchar)d;
             else
             {
-                w = cast(wchar) ((((d - 0x10000) >> 10) & 0x3FF) + 0xD800);
-                result = dg(&i, cast(void*)&w);
-                if (result)
-                    break;
-                w = cast(wchar) (((d - 0x10000) & 0x3FF) + 0xDC00);
+                w = cast(wchar)((((d - 0x10000) >> 10) & 0x3FF) + 0xD800);
+                if (auto r = dg(&i, cast(void*)&w))
+                    return r;
+                w = cast(wchar)(((d - 0x10000) & 0x3FF) + 0xDC00);
             }
         }
         else
-            n = 1;
-        result = dg(&i, cast(void*)&w);
-        if (result)
-            break;
+            i++;
+        if (auto r = dg(&i, cast(void*)&w))
+            return r;
     }
-    return result;
+    return 0;
 }
 
 unittest
@@ -604,11 +589,11 @@ unittest
         assert(k == i);
         switch (i)
         {
-            case 0:     assert(d == 'h'); break;
-            case 1:     assert(d == 'e'); break;
-            case 2:     assert(d == 'l'); break;
-            case 3:     assert(d == 'l'); break;
-            case 4:     assert(d == 'o'); break;
+            case 0:     assert(d == 'h');   break;
+            case 1:     assert(d == 'e');   break;
+            case 2:     assert(d == 'l');   break;
+            case 3:     assert(d == 'l');   break;
+            case 4:     assert(d == 'o');   break;
             default:    assert(0);
         }
         i++;
@@ -622,11 +607,11 @@ unittest
         //printf("i = %d, k = %d, d = %x\n", i, k, d);
         switch (i)
         {
-            case 0:     assert(k == 0); assert(d == 'a'); break;
-            case 1:     assert(k == 1); assert(d == 0x1234); break;
-            case 2:     assert(k == 4); assert(d == 0xDA41); break;
-            case 3:     assert(k == 4); assert(d == 0xDC56); break;
-            case 4:     assert(k == 8); assert(d == 'b'); break;
+            case 0:     assert(k == 0 && d == 'a');     break;
+            case 1:     assert(k == 1 && d == 0x1234);  break;
+            case 2:     assert(k == 4 && d == 0xDA41);  break;
+            case 3:     assert(k == 4 && d == 0xDC56);  break;
+            case 4:     assert(k == 8 && d == 'b');     break;
             default:    assert(0);
         }
         i++;
@@ -637,43 +622,31 @@ unittest
 /*****************************/
 
 extern(C) int _aApplywc2(in wchar[] a, dg2_t dg)
-{   int result;
-    size_t i;
-    size_t n;
-    size_t len = a.length;
+{
+    debug(apply) printf("_aApplywc2(), len = %d\n", a.length);
 
-    debug(apply) printf("_aApplywc2(), len = %d\n", len);
-    for (i = 0; i < len; i += n)
-    {   dchar d;
-        wchar w;
-        char c;
-
-        w = a[i];
+    immutable len = a.length;
+    for (size_t i = 0; i < len; i += n)
+    {
+        wchar w = a[i];
         if (w & ~0x7F)
         {
+            dchar d = decode(a, i);
             char[4] buf;
-
-            n = i;
-            d = decode(a, n);
-            n -= i;
             auto b = toUTF8(buf, d);
-            foreach (char c2; b)
+            foreach (char c; b)
             {
-                result = dg(&i, cast(void*)&c2);
-                if (result)
-                    return result;
+                if (auto r = dg(&i, cast(void*)&c))
+                    return r;
             }
             continue;
         }
-        else
-        {   c = cast(char)w;
-            n = 1;
-        }
-        result = dg(&i, cast(void*)&c);
-        if (result)
-            break;
+        char c = cast(char)w;
+        i++;
+        if (auto r = dg(&i, cast(void*)&c))
+            return r;
     }
-    return result;
+    return 0;
 }
 
 unittest
@@ -688,11 +661,11 @@ unittest
         assert(k == i);
         switch (i)
         {
-            case 0:     assert(d == 'h'); break;
-            case 1:     assert(d == 'e'); break;
-            case 2:     assert(d == 'l'); break;
-            case 3:     assert(d == 'l'); break;
-            case 4:     assert(d == 'o'); break;
+            case 0:     assert(d == 'h');   break;
+            case 1:     assert(d == 'e');   break;
+            case 2:     assert(d == 'l');   break;
+            case 3:     assert(d == 'l');   break;
+            case 4:     assert(d == 'o');   break;
             default:    assert(0);
         }
         i++;
@@ -706,15 +679,15 @@ unittest
         //printf("i = %d, k = %d, d = %x\n", i, k, d);
         switch (i)
         {
-            case 0:     assert(k == 0); assert(d == 'a'); break;
-            case 1:     assert(k == 1); assert(d == 0xE1); break;
-            case 2:     assert(k == 1); assert(d == 0x88); break;
-            case 3:     assert(k == 1); assert(d == 0xB4); break;
-            case 4:     assert(k == 2); assert(d == 0xF2); break;
-            case 5:     assert(k == 2); assert(d == 0xA0); break;
-            case 6:     assert(k == 2); assert(d == 0x91); break;
-            case 7:     assert(k == 2); assert(d == 0x96); break;
-            case 8:     assert(k == 4); assert(d == 'b'); break;
+            case 0:     assert(k == 0 && d == 'a');     break;
+            case 1:     assert(k == 1 && d == 0xE1);    break;
+            case 2:     assert(k == 1 && d == 0x88);    break;
+            case 3:     assert(k == 1 && d == 0xB4);    break;
+            case 4:     assert(k == 2 && d == 0xF2);    break;
+            case 5:     assert(k == 2 && d == 0xA0);    break;
+            case 6:     assert(k == 2 && d == 0x91);    break;
+            case 7:     assert(k == 2 && d == 0x96);    break;
+            case 8:     assert(k == 4 && d == 'b');     break;
             default:    assert(0);
         }
         i++;
@@ -725,37 +698,29 @@ unittest
 /*****************************/
 
 extern(C) int _aApplydc2(in dchar[] a, dg2_t dg)
-{   int result;
-    size_t i;
+{
     size_t len = a.length;
 
     debug(apply) printf("_aApplydc2(), len = %d\n", len);
-    for (i = 0; i < len; i++)
-    {   dchar d;
-        char c;
-
-        d = a[i];
+    for (size_t i = 0; i < len; i++)
+    {
+        dchar d = a[i];
         if (d & ~0x7F)
         {
             char[4] buf;
-
             auto b = toUTF8(buf, d);
-            foreach (char c2; b)
+            foreach (char c; b)
             {
-                result = dg(&i, cast(void*)&c2);
-                if (result)
-                    return result;
+                if (auto r = dg(&i, cast(void*)&c))
+                    return r;
             }
             continue;
         }
-        else
-        {   c = cast(char)d;
-        }
-        result = dg(&i, cast(void*)&c);
-        if (result)
-            break;
+        char c = cast(char)d;
+        if (auto r = dg(&i, cast(void*)&c))
+            return r;
     }
-    return result;
+    return 0;
 }
 
 unittest
@@ -807,29 +772,26 @@ unittest
 /*****************************/
 
 extern(C) int _aApplydw2(in dchar[] a, dg2_t dg)
-{   int result;
-
+{
     debug(apply) printf("_aApplydw2(), len = %d\n", a.length);
+
     foreach (size_t i, dchar d; a)
     {
-        wchar w;
         auto j = i;
-
+        wchar w;
         if (d <= 0xFFFF)
-            w = cast(wchar) d;
+            w = cast(wchar)d;
         else
         {
-            w = cast(wchar) ((((d - 0x10000) >> 10) & 0x3FF) + 0xD800);
-            result = dg(&j, cast(void*)&w);
-            if (result)
-                break;
-            w = cast(wchar) (((d - 0x10000) & 0x3FF) + 0xDC00);
+            w = cast(wchar)((((d - 0x10000) >> 10) & 0x3FF) + 0xD800);
+            if (auto r = dg(&j, cast(void*)&w))
+                return r;
+            w = cast(wchar)(((d - 0x10000) & 0x3FF) + 0xDC00);
         }
-        result = dg(&j, cast(void*)&w);
-        if (result)
-            break;
+        if (auto r = dg(&j, cast(void*)&w))
+            return r;
     }
-    return result;
+    return 0;
 }
 
 unittest
@@ -844,11 +806,11 @@ unittest
         assert(k == i);
         switch (i)
         {
-            case 0:     assert(d == 'h'); break;
-            case 1:     assert(d == 'e'); break;
-            case 2:     assert(d == 'l'); break;
-            case 3:     assert(d == 'l'); break;
-            case 4:     assert(d == 'o'); break;
+            case 0:     assert(d == 'h');   break;
+            case 1:     assert(d == 'e');   break;
+            case 2:     assert(d == 'l');   break;
+            case 3:     assert(d == 'l');   break;
+            case 4:     assert(d == 'o');   break;
             default:    assert(0);
         }
         i++;
@@ -862,11 +824,11 @@ unittest
         //printf("i = %d, k = %d, d = %x\n", i, k, d);
         switch (i)
         {
-            case 0:     assert(k == 0); assert(d == 'a'); break;
-            case 1:     assert(k == 1); assert(d == 0x1234); break;
-            case 2:     assert(k == 2); assert(d == 0xDA41); break;
-            case 3:     assert(k == 2); assert(d == 0xDC56); break;
-            case 4:     assert(k == 3); assert(d == 'b'); break;
+            case 0:     assert(k == 0 && d == 'a');     break;
+            case 1:     assert(k == 1 && d == 0x1234);  break;
+            case 2:     assert(k == 2 && d == 0xDA41);  break;
+            case 3:     assert(k == 2 && d == 0xDC56);  break;
+            case 4:     assert(k == 3 && d == 'b');     break;
             default:    assert(0);
         }
         i++;
