@@ -49,7 +49,7 @@ static immutable size_t[] prime_list = [
  * Although DMD will return types of Array in registers,
  * gcc will not, so we instead use a 'long'.
  */
-alias void[] ArrayRet_t;
+alias ArrayRet_t = void[];
 
 struct Array
 {
@@ -528,14 +528,12 @@ unittest // Test for Issue 10381
  * 'apply' for associative arrays - to support foreach
  */
 // dg is D, but _aaApply() is C
-extern (D) alias int delegate(void *) dg_t;
+alias dg_t = extern(D) int delegate(void*);
 
 int _aaApply(AA aa, in size_t keysize, dg_t dg)
 {
     if (aa.impl is null)
-    {
         return 0;
-    }
 
     immutable alignsize = aligntsize(keysize);
     //printf("_aaApply(aa = x%llx, keysize = %d, dg = x%llx)\n", aa.impl, keysize, dg);
@@ -544,9 +542,8 @@ int _aaApply(AA aa, in size_t keysize, dg_t dg)
     {
         while (e)
         {
-            auto result = dg(cast(void *)(e + 1) + alignsize);
-            if (result)
-                return result;
+            if (auto r = dg(cast(void*)(e + 1) + alignsize))
+                return r;
             e = e.next;
         }
     }
@@ -554,14 +551,12 @@ int _aaApply(AA aa, in size_t keysize, dg_t dg)
 }
 
 // dg is D, but _aaApply2() is C
-extern (D) alias int delegate(void *, void *) dg2_t;
+alias dg2_t = extern(D) int delegate(void*, void*);
 
 int _aaApply2(AA aa, in size_t keysize, dg2_t dg)
 {
     if (aa.impl is null)
-    {
         return 0;
-    }
 
     //printf("_aaApply(aa = x%llx, keysize = %d, dg = x%llx)\n", aa.impl, keysize, dg);
 
@@ -571,13 +566,11 @@ int _aaApply2(AA aa, in size_t keysize, dg2_t dg)
     {
         while (e)
         {
-            auto result = dg(e + 1, cast(void *)(e + 1) + alignsize);
-            if (result)
-                return result;
+            if (auto r = dg(e + 1, cast(void*)(e + 1) + alignsize))
+                return r;
             e = e.next;
         }
     }
-
     return 0;
 }
 

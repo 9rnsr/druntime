@@ -1991,7 +1991,7 @@ extern (C)
 
 auto aaLiteral(Key, Value, T...)(auto ref T args) if (T.length % 2 == 0)
 {
-    static if(!T.length)
+    static if (!T.length)
     {
         return cast(void*)null;
     }
@@ -2023,34 +2023,36 @@ auto aaLiteral(Key, Value, T...)(auto ref T args) if (T.length % 2 == 0)
 
 alias AssociativeArray(Key, Value) = Value[Key];
 
-T rehash(T : Value[Key], Value, Key)(T aa)
+T rehash(T : V[K], K, V)(T aa)
 {
-    _aaRehash(cast(void**)&aa, typeid(Value[Key]));
+    if (!__ctfe)
+        _aaRehash(cast(void**)&aa, typeid(Value[Key]));
     return aa;
 }
 
 T rehash(T : Value[Key], Value, Key)(T* aa)
 {
-    _aaRehash(cast(void**)aa, typeid(Value[Key]));
+    if (!__ctfe)
+        _aaRehash(cast(void**)aa, typeid(Value[Key]));
     return *aa;
 }
 
 T rehash(T : shared Value[Key], Value, Key)(T aa)
 {
-    _aaRehash(cast(void**)&aa, typeid(Value[Key]));
+    if (!__ctfe)
+        _aaRehash(cast(void**)&aa, typeid(Value[Key]));
     return aa;
 }
 
 T rehash(T : shared Value[Key], Value, Key)(T* aa)
 {
-    _aaRehash(cast(void**)aa, typeid(Value[Key]));
+    if (!__ctfe)
+        _aaRehash(cast(void**)aa, typeid(Value[Key]));
     return *aa;
 }
 
 V[K] dup(T : V[K], K, V)(T aa)
 {
-    //pragma(msg, "K = ", K, ", V = ", V);
-
     // Bug10720 - check whether V is copyable
     static assert(is(typeof({ V v = aa[K.init]; })),
         "cannot call " ~ T.stringof ~ ".dup because " ~ V.stringof ~ " is not copyable");
@@ -2130,24 +2132,42 @@ auto byValue(T : Value[Key], Value, Key)(T *aa) pure nothrow @nogc
     return (*aa).byValue();
 }
 
-Key[] keys(T : Value[Key], Value, Key)(T aa) @property
+K[] keys(T : V[K], K, V)(T aa) @property
 {
-    auto a = cast(void[])_aaKeys(cast(inout(void)*)aa, Key.sizeof);
-    return *cast(Key[]*)&a;
+    if (__ctfe)
+    {
+        K[] result;
+        foreach (ref k, ref v; aa)
+            result ~= k;
+        return result;
+    }
+    else
+    {
+        return cast(K[])_aaKeys(cast(inout(void)*)aa, K.sizeof);
+    }
 }
 
-Key[] keys(T : Value[Key], Value, Key)(T *aa) @property
+K[] keys(T : V[K], K, V)(T *aa) @property
 {
     return (*aa).keys;
 }
 
-Value[] values(T : Value[Key], Value, Key)(T aa) @property
+V[] values(T : V[K], K, V)(T aa) @property
 {
-    auto a = cast(void[])_aaValues(cast(inout(void)*)aa, Key.sizeof, Value.sizeof);
-    return *cast(Value[]*)&a;
+    if (__ctfe)
+    {
+        V[] result;
+        foreach (ref v; aa)
+            result ~= v;
+        return result;
+    }
+    else
+    {
+        return cast(V[])_aaValues(cast(inout(void)*)aa, K.sizeof, V.sizeof);
+    }
 }
 
-Value[] values(T : Value[Key], Value, Key)(T *aa) @property
+V[] values(T : V[K], K, V)(T *aa) @property
 {
     return (*aa).values;
 }
